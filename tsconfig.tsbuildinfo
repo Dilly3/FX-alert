@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/logger/google.cloud.logger.ts","./src/mailer/models.mailer.ts","./src/mailer/sendgrid/sendgrid.ts","./src/router/app.ts"],"version":"5.8.3"}
