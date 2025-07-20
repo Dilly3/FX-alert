@@ -10,13 +10,10 @@ fi
 
 echo "deploying to $PROJECT_NAME"
 
-# Try deployment with buildpacks first (more reliable)
-echo "Attempting deployment with buildpacks..."
-gcloud run deploy $PROJECT_NAME --source . --region us-west1 --allow-unauthenticated --platform managed --timeout=900
+echo "deployment with buildpacks..."
+gcloud run deploy $PROJECT_NAME --source . --region us-west1 --allow-unauthenticated --platform managed --timeout=900 
 
 
 echo "deployed to $PROJECT_NAME"
 
 exit 0
-
-# gcloud run deploy $PROJECT_NAME --source . --region us-west1 --allow-unauthenticated --platform managed --timeout=300 --set-secrets=TOPIC_ID=TOPIC_ID:latest --set-secrets=PROJECT_ID=PROJECT_ID:latest
