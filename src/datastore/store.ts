@@ -1,25 +1,20 @@
 import * as admin from "firebase-admin";
 import * as serviceAccount from "../../service-account-key.json";
-import { DocumentData, DocumentReference, Firestore, WriteResult } from "@google-cloud/firestore";
-import { currency } from "../model/model";
-
-
-export enum collection {
-    CURRENCY = "currencies",
-    USER = "users"
-}
+import { Firestore} from "@google-cloud/firestore";
 
 
 
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount as admin.ServiceAccount)
+    credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+    projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id,
+   storageBucket: process.env.FIREBASE_STORAGE_BUCKET
   });
 }
 
-const db:Firestore = admin.firestore();
+const db: Firestore = admin.firestore();
 
-export const getdb = ():Firestore => db
+export const getdb = (): Firestore => db;
 
 
 

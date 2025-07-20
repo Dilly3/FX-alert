@@ -6,3 +6,4 @@ firestore.indexes.json
 firestore.rules
 firestore.indexes.json
 firebase.json
+tsconfig.tsbuildinfo

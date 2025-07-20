@@ -1,6 +1,6 @@
 import { Firestore, DocumentReference, DocumentData } from "@google-cloud/firestore";
 import { currency } from "../model/model";
-import { collection } from "./store";
+import { collection } from "../model/model";
 
 export class Currency {
 constructor(private db:Firestore){
