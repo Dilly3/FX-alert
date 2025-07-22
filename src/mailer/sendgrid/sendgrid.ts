@@ -1,5 +1,6 @@
 // Load environment variables from .env file
 require('dotenv').config()
+import { default_config } from "../../secrets/secrets_manager"
 import { EmailData,EmailOptions } from "../models.mailer"
 
 const sgMail = require('@sendgrid/mail')
@@ -7,7 +8,7 @@ const ejs = require('ejs')
 const path = require('path')
 const fs = require('fs')
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+sgMail.setApiKey(default_config!.sendgrid_api_key)
 
 
 function generateTextContent(data: EmailData): string {
@@ -57,8 +58,8 @@ export async function sendExchangeRateEmail(data: EmailData, to : string): Promi
 // Create email options
 const emailOptions: EmailOptions = {
   to: to,
-  from: process.env.SENDGRID_SENDER_EMAIL || "",
-  subject: process.env.EMAIL_SUBJECT || 'Today Rate'
+  from: default_config!.sendgrid_sender_email || "",
+  subject: "Today's Exchange Rates"
 }
   await sendEmail(data, emailOptions)
 } 
