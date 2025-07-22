@@ -7,3 +7,5 @@ firestore.rules
 firestore.indexes.json
 firebase.json
 tsconfig.tsbuildinfo
+.terraform
+.terraform.lock.hcl
