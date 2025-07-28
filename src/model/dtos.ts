@@ -7,4 +7,10 @@ type UserCreateDto = {
     preferences: string
 }
 
-export {UserCreateDto}
+interface CurrencyResponse {
+  success: boolean;
+  symbols: Record<string, string>;
+}
+
+export {UserCreateDto, CurrencyResponse}
+

@@ -1,8 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, PrimaryColumn } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, PrimaryColumn, Unique } from "typeorm"
 
 @Entity()
 export class Currency {
+
     @PrimaryColumn()
+    @Unique(['id'])
+    id! : string
+    @Column()
     code! : string
     @Column()
     name! : string
@@ -44,6 +48,18 @@ export class UserInfo {
 
     @Column()
     preferences! : string
+
+    @Column()
+    createdAt! : Date
+
+    @Column()
+    updatedAt! : Date
+
+    @Column()
+    verificationPin! : string
+
+    @Column()
+    isActive! : boolean
     
 } 
 

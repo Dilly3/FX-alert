@@ -28,6 +28,7 @@
     "@google-cloud/secret-manager": "^6.1.0",
     "@sendgrid/mail": "^8.1.5",
     "@types/ejs": "^3.1.5",
+    "axios": "^1.11.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "ejs": "^3.1.10",
@@ -37,6 +38,7 @@
     "typeorm": "^0.3.25"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/express": "^5.0.3",
     "@types/node": "^24.0.15",
     "@types/uuid": "^10.0.0",

@@ -4,7 +4,7 @@ declare GOOGLE_CLOUD_PROJECT=$1
 declare ENV=$2
 
 read -p "Enter project ID: " GOOGLE_CLOUD_PROJECT
-read -p "Enter project Environment- prod or dev: " ENV
+read -p "Enter project Environment- prod/dev/sandbox: " ENV
 
 
 declare PROJECT_NAME
@@ -15,17 +15,21 @@ if [ -z "$1" ]; then
 else
     PROJECT_NAME="$(echo "${1}" | tr '[:upper:]' '[:lower:]')"
 fi
-
+npm run build
+if [ $? -ne 0 ]; then
+    echo "build failed"
+    exit 1
+fi
 echo "deploying to $PROJECT_NAME"
 
 echo "deployment with buildpacks..."
 gcloud run deploy $PROJECT_NAME --source . --region us-west1 --allow-unauthenticated --platform managed \
-  --vpc-connector=projects/fs-alert-d4f21/locations/us-west1/connectors/fs-alert-vpc-connector \
+  --vpc-connector=projects/fs-alert-d4f21/locations/us-west1/connectors/fx-alert-vpc-connector \
   --vpc-egress=private-ranges-only \
   --region=us-west1 \
-  --memory=128Mi \
+  --memory=512Mi \
   --cpu=1 \
-  --timeout=3000 \
+  --timeout=3600 \
   --max-instances=2 --set-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
   --set-env-vars ENV=$ENV \
   --region us-west1 \
