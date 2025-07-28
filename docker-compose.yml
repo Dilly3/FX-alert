@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "7020:7020"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/fx_alert_db
+      - NODE_ENV=${NODE_ENV:-development}
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=fx_alert_db
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - SENDGRID_API_KEY=your-dev-sendgrid-key
+      - SENDGRID_SENDER_EMAIL=your-dev-email@example.com
+      - SENDGRID_EMAIL_SUBJECT=FX Alert (Dev)
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - postgres
+    restart: on-failure
+  postgres:
+    container_name: fx_alert_db
+    image: postgres:15.1
+    hostname: localhost
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: fx_alert_db
+    volumes:
+      - postgres-fx-alert:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres-fx-alert:
