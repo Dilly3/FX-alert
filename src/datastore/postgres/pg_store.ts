@@ -3,9 +3,7 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Currency, CurrencyRate, UserInfo } from "../../model/model";
-import { config, default_config } from "../../secrets/secrets_manager";
-import { pg_user_store } from "./pg_user_store";
-import { pg_currency_store } from "./pg_currency_store";
+import { config } from "../../secrets/secrets_manager";
 
 
 
@@ -18,7 +16,7 @@ export function getDB():DataSource{
     return db_instance
 }
 
-export async function initializeDB(config:config):Promise<DataSource>{
+export async function initializePgDB(config:config):Promise<DataSource>{
 console.log("initializing db")
 console.log("config object",config)
 
