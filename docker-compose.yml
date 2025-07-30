@@ -4,19 +4,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    env_file:
+      - .env
     ports:
       - "7020:7020"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/fx_alert_db
-      - NODE_ENV=${NODE_ENV:-development}
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=fx_alert_db
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - SENDGRID_API_KEY=your-dev-sendgrid-key
-      - SENDGRID_SENDER_EMAIL=your-dev-email@example.com
-      - SENDGRID_EMAIL_SUBJECT=FX Alert (Dev)
+      - GOOGLE_APPLICATION_CREDENTIALS=./service-account2-key.json
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
