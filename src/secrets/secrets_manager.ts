@@ -18,11 +18,15 @@ sendgrid_email_subject : string
 firebase_storage_bucket : string
 firestore_database_id : string
 forex_api_key : string
+rate_limit_max : number
+rate_limit_window : number
 }
 
 async function getSecret(secretName: string): Promise<string> {
   try {
-    const client = new SecretManagerServiceClient();
+    const client = new SecretManagerServiceClient({
+      timeout: 10000, // 10 second timeout
+    });
     dotenv.config({path: '../../.env_cloud'})
     const projectId = process.env.GOOGLE_CLOUD_PROJECT;
     
@@ -34,7 +38,13 @@ async function getSecret(secretName: string): Promise<string> {
       name: `projects/${projectId}/secrets/${secretName}/versions/latest`,
     });
 
-    return version.payload?.data?.toString() || '';
+    const secretValue = version.payload?.data?.toString();
+    if (!secretValue) {
+      throw new Error(`Secret '${secretName}' is empty or not found`);
+    }
+
+    await client.close();
+    return secretValue;
   } catch (error) {
     console.error(`Failed to fetch secret '${secretName}':`, error);
     throw error;
@@ -42,19 +52,39 @@ async function getSecret(secretName: string): Promise<string> {
 }
 
 export async function loadGCPSecrets(): Promise<config> {
-  const dbPassword = await getSecret('database_password');
-  const dbUser = await getSecret('database_user');
-  const dbName = await getSecret('database_name');
-  const dbHost = await getSecret('database_host');
-  const dbPort = await getSecret('database_port');
-  const projectId = await getSecret('fx_alert_project_id');
-  const sendgridApiKey = await getSecret('sendgrid_api_key');
-  const sendgridSenderEmail = await getSecret('sendgrid_sender_email');
-  const firebaseStorageBucket = await getSecret('firebase_storage_bucket');
-  const sendgridEmailSubject = await getSecret('sendgrid_email_subject');
-  const forexApiKey = await getSecret('forex_api_key');
-  const firestoreDatabaseId = await getSecret('database_id');
-const env = process.env.ENV!;
+  const [
+    dbPassword,
+    dbUser,
+    dbName,
+    dbHost,
+    dbPort,
+    projectId,
+    sendgridApiKey,
+    sendgridSenderEmail,
+    firebaseStorageBucket,
+    sendgridEmailSubject,
+    forexApiKey,
+    firestoreDatabaseId,
+    rateLimitMax,
+    rateLimitWindow
+  ] = await Promise.all([
+    getSecret('database_password'),
+    getSecret('database_user'),
+    getSecret('database_name'),
+    getSecret('database_host'),
+    getSecret('database_port'),
+    getSecret('fx_alert_project_id'),
+    getSecret('sendgrid_api_key'),
+    getSecret('sendgrid_sender_email'),
+    getSecret('firebase_storage_bucket'),
+    getSecret('sendgrid_email_subject'),
+    getSecret('forex_api_key'),
+    getSecret('database_id'),
+    getSecret('rate_limit_max'),
+    getSecret('rate_limit_window')
+  ]);
+
+  const env = process.env.ENV!;
 
 
   const config = {
@@ -71,7 +101,9 @@ const env = process.env.ENV!;
     firebase_storage_bucket: firebaseStorageBucket,
     sendgrid_email_subject: sendgridEmailSubject,
     forex_api_key: forexApiKey,
-    firestore_database_id: firestoreDatabaseId
+    firestore_database_id: firestoreDatabaseId,
+    rate_limit_max: parseInt(rateLimitMax),
+    rate_limit_window: parseInt(rateLimitWindow)
   }
   default_config = config
   return config
@@ -90,7 +122,8 @@ export async function loadENVSecrets():Promise<config>{
   const sendgridEmailSubject = process.env.SENDGRID_EMAIL_SUBJECT!;
   const forexApiKey = process.env.FOREX_API_KEY!;
   const env = process.env.ENV!;
-
+  const rateLimitMax = process.env.RATE_LIMIT_MAX!;
+  const rateLimitWindow = process.env.RATE_LIMIT_WINDOW!;
   const config = {
     env: env,
     host: dbHost,
@@ -105,7 +138,9 @@ export async function loadENVSecrets():Promise<config>{
     firebase_storage_bucket: firebaseStorageBucket,
     sendgrid_email_subject: sendgridEmailSubject,
     forex_api_key: forexApiKey,
-    firestore_database_id: ""
+    firestore_database_id: "",
+    rate_limit_max: parseInt(rateLimitMax),
+    rate_limit_window: parseInt(rateLimitWindow)
   }
   default_config = config
   return config
