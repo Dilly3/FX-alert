@@ -1,12 +1,12 @@
 
 data "google_compute_network" "private_network" {
-  project = "fs-alert-d4f21"
+  project = var.project_id
   name    = "fx-alert-vpc-network"
 }
 
 resource "google_sql_database_instance" "instance" {
-  project = "fs-alert-d4f21"
-  name             = "fX-alert-db"
+  project = var.project_id
+  name             = "fx-alert-db"
   region           = "us-west1"
   database_version = "POSTGRES_15"
   deletion_protection = false
@@ -28,6 +28,6 @@ resource "google_sql_database_instance" "instance" {
 resource "google_sql_database" "database" {
   name     = "fx_alert_db"
   instance = google_sql_database_instance.instance.name
-  project  = "fs-alert-d4f21"
+  project  = var.project_id
 }
 

@@ -1,12 +1,12 @@
 resource "google_compute_network" "private_network" {
   provider = google-beta
-  project = "fs-alert-d4f21"
+  project = var.project_id
   name = "fx-alert-vpc-network"
 }
 
 resource "google_compute_global_address" "private_ip_address" {
   provider = google-beta
-  project       = "fs-alert-d4f21"
+  project       = var.project_id
   name          = "fx-alert-vpc-ip"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
@@ -22,7 +22,7 @@ resource "google_service_networking_connection" "private_vpc_connection" {
 }
 
 resource "google_vpc_access_connector" "connector" {
-  project       = "fs-alert-d4f21"
+  project       = var.project_id
   name          = "fx-alert-vpc-connector"
   ip_cidr_range = "10.8.0.0/28"
   network       = google_compute_network.private_network.name
@@ -33,7 +33,7 @@ resource "google_vpc_access_connector" "connector" {
 }
 
 resource "google_compute_firewall" "allow_private_network" {
-  project = "fs-alert-d4f21"
+  project = var.project_id
   name    = "allow-private-network"
   network = google_compute_network.private_network.name
   
@@ -46,7 +46,7 @@ resource "google_compute_firewall" "allow_private_network" {
 }
 
 resource "google_compute_firewall" "allow_connector" {
-  project = "fs-alert-d4f21"
+  project = var.project_id
   name    = "allow-vpc-connector"
   network = google_compute_network.private_network.name
   
