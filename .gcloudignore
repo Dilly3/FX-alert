@@ -12,3 +12,4 @@ tsconfig.json
 !dist/
 Dockerfile.dev
 docker-compose.yml
+variables.tfvars

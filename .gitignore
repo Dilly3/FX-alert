@@ -9,3 +9,4 @@ firebase.json
 tsconfig.tsbuildinfo
 .terraform
 .terraform.lock.hcl
+variables.auto.tfvars
