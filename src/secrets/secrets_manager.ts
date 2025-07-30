@@ -110,6 +110,18 @@ export async function loadGCPSecrets(): Promise<config> {
 }
 
 export async function loadENVSecrets():Promise<config>{
+  const requiredEnvVars = [
+    'DB_PASSWORD', 'DB_USER', 'DB_NAME', 'DB_HOST', 'DB_PORT',
+    'GOOGLE_CLOUD_PROJECT', 'SENDGRID_API_KEY', 'SENDGRID_SENDER_EMAIL',
+    'FIREBASE_STORAGE_BUCKET', 'SENDGRID_EMAIL_SUBJECT', 'FOREX_API_KEY',
+    'ENV', 'RATE_LIMIT_MAX', 'RATE_LIMIT_WINDOW'
+  ];
+
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  if (missingVars.length > 0) {
+    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+  }
+
   const dbPassword = process.env.DB_PASSWORD!;
   const dbUser = process.env.DB_USER!;
   const dbName = process.env.DB_NAME!;

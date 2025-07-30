@@ -13,6 +13,12 @@ interface EmailDataItem {
 
 export type EmailData = EmailDataItem | EmailDataItem[];
 
+export interface PinVerificationEmailData {
+    pin: string;
+    email: string;
+    expiryTime: string;
+}
+
 export interface EmailOptions {
   to: string;
   from: string;

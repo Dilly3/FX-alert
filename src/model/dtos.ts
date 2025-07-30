@@ -1,10 +1,7 @@
-type UserCreateDto = {
+type CreateUserDto = {
     email: string
-    firstName: string 
-    lastName: string
-    fromCurrency: string
-    toCurrency: string
-    preferences: string
+    baseCurrency: string
+    targetCurrency: string
 }
 
 interface CurrencyResponse {
@@ -33,9 +30,14 @@ interface LiveRatesResponse {
   rates: Record<string, number>;
 }
 
+interface VerifyUserDto {
+  email: string;
+  pin: string;
+}
 
 
 
 
-export {UserCreateDto, CurrencyResponse, ConvertCurrencyResponse, LiveRatesResponse}
+
+export {CreateUserDto, CurrencyResponse, ConvertCurrencyResponse, LiveRatesResponse, VerifyUserDto}
 

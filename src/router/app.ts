@@ -8,6 +8,8 @@ import { Firestore } from "@google-cloud/firestore";
 import { DataSource } from "typeorm";
 import { CurrencyDataStore, getCurrencyDataStore, UserDataStore, getUserStore } from "../datastore/datastore";
 import { ForexApi } from "../fx/forex_api/forex_api";
+import { CurrencyHandler } from "./handlers/currency_handler";
+import { SendGrid } from "../mailer/sendgrid/sendgrid";
 
 export interface AppState {
   dbFirestore: Firestore;
@@ -15,6 +17,7 @@ export interface AppState {
   userStore: UserDataStore;
   currencyStore: CurrencyDataStore;
   forexApi: ForexApi;
+  sendgrid: SendGrid;
   isAppReady: boolean;
 }
 
@@ -26,7 +29,8 @@ export async function initializeApplication() : Promise<{appState: AppState, sec
     userStore: null!,
     currencyStore: null!,
     forexApi: null!,
-    isAppReady: false
+    sendgrid: null!,
+    isAppReady: false,
   };
 
   try {
@@ -62,6 +66,7 @@ export async function initializeApplication() : Promise<{appState: AppState, sec
     appState.userStore = getUserStore(appState.dbPG, appState.dbFirestore);
     appState.currencyStore = getCurrencyDataStore(appState.dbPG, appState.dbFirestore);
     appState.forexApi = new ForexApi(secrets!.forex_api_key, appState.currencyStore!);
+    appState.sendgrid = new SendGrid(secrets!);
     LogInfo("Stores initialized successfully",{});
 
     appState.isAppReady = true;

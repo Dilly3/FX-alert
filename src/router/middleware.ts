@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { AppState } from "./app";
 import { config } from "../secrets/secrets_manager";
-import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
+import rateLimit from "express-rate-limit";
+import type { RateLimitRequestHandler } from "express-rate-limit";
 
 
 export function RateLimiting(secrets: config) : RateLimitRequestHandler {

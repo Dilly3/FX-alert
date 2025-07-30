@@ -32,22 +32,13 @@ export class UserInfo {
     id!: string;
 
     @Column()
-    firstName! : string
-
-    @Column()
-    lastName!: string
-
-    @Column()
     email! : string
 
     @Column()
-    fromCurrency! : string
+    baseCurrency! : string
 
     @Column()
-    toCurrency! : string
-
-    @Column()
-    preferences! : string
+    targetCurrency! : string
 
     @Column()
     createdAt! : Date
@@ -59,7 +50,10 @@ export class UserInfo {
     verificationPin! : string
 
     @Column()
-    isActive! : boolean
+    pinExpiryTime! : Date
+
+    @Column()
+    isVerified! : boolean
     
 } 
 

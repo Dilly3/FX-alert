@@ -353,4 +353,19 @@ export class FirestoreUserStore implements UserDataStore {
             throw new Error(`Failed to bulk update users: ${message}`);
         }
     }
+
+    generatePin(): string {
+        // Generate a 6 digit pin
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    validatePin(pin: string, user: UserInfo): boolean {
+        if (pin !== user.verificationPin) {
+            return false;
+        }
+        if (user.pinExpiryTime < new Date()) {
+            return false;
+        }
+        return true;
+    }
 }
