@@ -1,6 +1,6 @@
 
 resource "google_firestore_database" "fx-alert-db" {
-  project                           = "fs-alert-d4f21"
+  project                           = var.project_id
   name                              = "fx-alert-db"
   location_id                       = "nam5"
   type                              = "FIRESTORE_NATIVE"
@@ -13,7 +13,7 @@ resource "google_firestore_database" "fx-alert-db" {
 }
 
 resource "google_firebaserules_ruleset" "firestore" {
-  project = "fs-alert-d4f21"
+  project = var.project_id
   source {
     files {
       content = file("firestore.rules")
