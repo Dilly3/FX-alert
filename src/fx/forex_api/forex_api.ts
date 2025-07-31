@@ -56,7 +56,6 @@ async saveSupportedCurrencies(): Promise<CurrencyResponse> {
       const currency = new Currency();
       currency.code = key;
       currency.name = value;
-      currency.id = key;
       return this.currencyDataStore.firstOrCreate(currency);
     }
   ); 
