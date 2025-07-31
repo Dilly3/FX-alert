@@ -20,6 +20,7 @@ firestore_database_id : string
 forex_api_key : string
 rate_limit_max : number
 rate_limit_window : number
+base_url : string
 }
 
 async function getSecret(secretName: string): Promise<string> {
@@ -66,7 +67,8 @@ export async function loadGCPSecrets(): Promise<config> {
     forexApiKey,
     firestoreDatabaseId,
     rateLimitMax,
-    rateLimitWindow
+    rateLimitWindow,
+    baseUrl
   ] = await Promise.all([
     getSecret('database_password'),
     getSecret('database_user'),
@@ -81,7 +83,8 @@ export async function loadGCPSecrets(): Promise<config> {
     getSecret('forex_api_key'),
     getSecret('database_id'),
     getSecret('rate_limit_max'),
-    getSecret('rate_limit_window')
+    getSecret('rate_limit_window'),
+    getSecret('base_url')
   ]);
 
   const env = process.env.ENV!;
@@ -103,7 +106,8 @@ export async function loadGCPSecrets(): Promise<config> {
     forex_api_key: forexApiKey,
     firestore_database_id: firestoreDatabaseId,
     rate_limit_max: parseInt(rateLimitMax),
-    rate_limit_window: parseInt(rateLimitWindow)
+    rate_limit_window: parseInt(rateLimitWindow),
+    base_url: baseUrl
   }
   default_config = config
   return config
@@ -124,6 +128,7 @@ export async function loadENVSecrets():Promise<config>{
   const env = process.env.ENV!;
   const rateLimitMax = process.env.RATE_LIMIT_MAX!;
   const rateLimitWindow = process.env.RATE_LIMIT_WINDOW!;
+  const baseUrl = process.env.BASE_URL!;
   const config = {
     env: env,
     host: dbHost,
@@ -140,7 +145,8 @@ export async function loadENVSecrets():Promise<config>{
     forex_api_key: forexApiKey,
     firestore_database_id: "",
     rate_limit_max: parseInt(rateLimitMax),
-    rate_limit_window: parseInt(rateLimitWindow)
+    rate_limit_window: parseInt(rateLimitWindow),
+    base_url: baseUrl
   }
   default_config = config
   return config
