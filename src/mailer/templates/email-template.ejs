@@ -88,6 +88,23 @@
             font-size: 12px;
             color: #6c757d;
         }
+        .success-indicator {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .success-true {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .success-false {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -97,86 +114,69 @@
             <p>Your daily currency exchange update</p>
         </div>
 
-        <% if (Array.isArray(data)) { %>
-            <!-- Multiple Exchange Rates -->
-            <h2 style="text-align: center; color: #007bff; margin-bottom: 30px;">📊 MULTIPLE EXCHANGE RATES</h2>
-            
-            <% data.forEach((item, index) => { %>
-                <div class="rate-card" style="margin-bottom: 20px;">
-                    <div class="currency-pair"><%= item.baseCurrency %> / <%= item.currency %></div>
-                    <div class="rate-value"><%= item.rate.toLocaleString() %></div>
-                    <div>Exchange Rate #<%= index + 1 %></div>
-                </div>
-
-                <div class="details">
-                    <h3>📊 Rate Details #<%= index + 1 %></h3>
-                    <div class="detail-row">
-                        <span class="detail-label">Base Currency:</span>
-                        <span class="detail-value"><%= item.baseCurrency %></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Target Currency:</span>
-                        <span class="detail-value"><%= item.currency %></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Exchange Rate:</span>
-                        <span class="detail-value"><%= item.rate.toLocaleString() %></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Newsletter:</span>
-                        <span class="detail-value"><%= item.preferences.newsletter ? '✅ Subscribed' : '❌ Not Subscribed' %></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Notifications:</span>
-                        <span class="detail-value"><%= item.preferences.notifications ? '✅ Enabled' : '❌ Disabled' %></span>
-                    </div>
-                </div>
-            <% }); %>
-        <% } else { %>
-            <!-- Single Exchange Rate -->
-            <div class="rate-card">
-                <div class="currency-pair"><%= data.baseCurrency %> / <%= data.currency %></div>
-                <div class="rate-value"><%= data.rate.toLocaleString() %></div>
-                <div>Current Exchange Rate</div>
-            </div>
-
-            <div class="details">
-                <h3>📊 Rate Details</h3>
-                <div class="detail-row">
-                    <span class="detail-label">Base Currency:</span>
-                    <span class="detail-value"><%= data.baseCurrency %></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Target Currency:</span>
-                    <span class="detail-value"><%= data.currency %></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Exchange Rate:</span>
-                    <span class="detail-value"><%= data.rate.toLocaleString() %></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Newsletter:</span>
-                    <span class="detail-value"><%= data.preferences.newsletter ? '✅ Subscribed' : '❌ Not Subscribed' %></span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Notifications:</span>
-                    <span class="detail-value"><%= data.preferences.notifications ? '✅ Enabled' : '❌ Disabled' %></span>
-                </div>
-            </div>
-        <% } %>
-
-        <div class="timestamp">
-            <% if (Array.isArray(data)) { %>
-                📅 Last Updated: <%= new Date(data[0].timestamp).toLocaleString() %>
-                <br>
-                📊 Total Rates: <%= data.length %>
+        <!-- API Response Status -->
+        <div class="success-indicator success-<%= data.success.toString() %>">
+            <% if (data.success) { %>
+                ✅ API Response: Success
             <% } else { %>
-                📅 Last Updated: <%= new Date(data.timestamp).toLocaleString() %>
+                ❌ API Response: Failed
             <% } %>
         </div>
 
+        <!-- Base Currency Information -->
+        <div class="details">
+            <h3>📊 Base Currency Information</h3>
+            <div class="detail-row">
+                <span class="detail-label">Base Currency:</span>
+                <span class="detail-value"><%= data.base %></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Total Rates Available:</span>
+                <span class="detail-value"><%= Object.keys(data.rates).length %></span>
+            </div>
+        </div>
+
+        <!-- Exchange Rates -->
+        <h2 style="text-align: center; color: #007bff; margin-bottom: 30px;">📊 RATES TODAY</h2>
+        
+        <% Object.entries(data.rates).forEach(([currency, rate], index) => { %>
+            <div class="rate-card" style="margin-bottom: 20px;">
+                <div class="currency-pair"><%= data.base %> / <%= currency %></div>
+                <div class="rate-value"><%= rate.toLocaleString() %></div>
+                <div>Exchange Rate #<%= index + 1 %></div>
+            </div>
+
+            <div class="details">
+                <h3>📊 Rate Details #<%= index + 1 %></h3>
+                <div class="detail-row">
+                    <span class="detail-label">Base Currency:</span>
+                    <span class="detail-value"><%= data.base %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Target Currency:</span>
+                    <span class="detail-value"><%= currency %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Exchange Rate:</span>
+                    <span class="detail-value"><%= rate.toLocaleString() %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Rate Index:</span>
+                    <span class="detail-value">#<%= index + 1 %> of <%= Object.keys(data.rates).length %></span>
+                </div>
+            </div>
+        <% }); %>
+
+        <div class="timestamp">
+            📅 Last Updated: <%= new Date(data.timestamp * 1000).toLocaleString() %>
+            <br>
+            📊 Total Rates: <%= Object.keys(data.rates).length %>
+            <br>
+            🏦 Base Currency: <%= data.base %>
+        </div>
+
         <div class="footer">
-            <p>Thank you for using our exchange rate service!</p>
+            <p>Thank you for using FX Alert service!</p>
             <p>This is an automated message. Please do not reply to this email.</p>
         </div>
     </div>

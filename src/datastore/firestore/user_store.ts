@@ -28,8 +28,14 @@ export class FirestoreUserStore implements UserDataStore {
             }
 
             // User doesn't exist, create new one
+            // Convert pinExpiryTime to ISO string if it's a Date object
+            const pinExpiryTime = user.pinExpiryTime instanceof Date 
+                ? user.pinExpiryTime.toISOString() 
+                : user.pinExpiryTime;
+                
             const docRef = await this.db.collection(this.COLLECTION_NAME).add({
                 ...user,
+                pinExpiryTime: pinExpiryTime,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 isVerified: false
@@ -40,7 +46,13 @@ export class FirestoreUserStore implements UserDataStore {
             
             return {
                 id: newDoc.id,
-                ...newData
+                email: newData?.email,
+                baseCurrency: newData?.baseCurrency,
+                targetCurrency: newData?.targetCurrency,
+                pinExpiryTime: newData?.pinExpiryTime,
+                isVerified: newData?.isVerified,
+                verificationPin: newData?.verificationPin,
+                createdAt: newData?.createdAt,
             } as UserInfo;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown error';
@@ -123,8 +135,18 @@ export class FirestoreUserStore implements UserDataStore {
 
     async saveUser(user: UserInfo): Promise<UserInfo> {
         try {
+            // Convert pinExpiryTime to ISO string if it's a Date object
+            const pinExpiryTime = user.pinExpiryTime instanceof Date 
+                ? user.pinExpiryTime.toISOString() 
+                : user.pinExpiryTime;
+                
             const docRef = await this.db.collection(this.COLLECTION_NAME).add({
-                ...user,
+                email: user.email,
+                baseCurrency: user.baseCurrency,
+                targetCurrency: user.targetCurrency,
+                pinExpiryTime: pinExpiryTime,
+                isVerified: user.isVerified,
+                verificationPin: user.verificationPin,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             });
@@ -134,7 +156,14 @@ export class FirestoreUserStore implements UserDataStore {
 
             return {
                 id: doc.id,
-                ...data
+                email: data?.email,
+                baseCurrency: data?.baseCurrency,
+                targetCurrency: data?.targetCurrency,
+                pinExpiryTime: data?.pinExpiryTime,
+                isVerified: data?.isVerified,
+                verificationPin: data?.verificationPin,
+                createdAt: data?.createdAt,
+                updatedAt: data?.updatedAt
             } as UserInfo;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown error';
@@ -154,7 +183,14 @@ export class FirestoreUserStore implements UserDataStore {
             const data = doc.data();
             return {
                 id: doc.id, 
-                ...data
+                email: data.email,
+                baseCurrency: data.baseCurrency,
+                targetCurrency: data.targetCurrency,
+                pinExpiryTime: data.pinExpiryTime,
+                isVerified: data.isVerified,
+                verificationPin: data.verificationPin,
+                createdAt: data.createdAt,
+                updatedAt: data.updatedAt
             } as UserInfo;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown error';
@@ -352,5 +388,26 @@ export class FirestoreUserStore implements UserDataStore {
             const message = error instanceof Error ? error.message : 'Unknown error';
             throw new Error(`Failed to bulk update users: ${message}`);
         }
+    }
+
+    generatePin(): string {
+        // Generate a 6 digit pin
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    validatePin(pin: string, user: UserInfo): boolean {
+        if (pin !== user.verificationPin) {
+            return false;
+        }  
+        // Convert string date to Date object for comparison
+        // Firestore returns a string date
+        const expiryTime = typeof user.pinExpiryTime === 'string' 
+            ? new Date(user.pinExpiryTime) 
+            : user.pinExpiryTime;
+            
+        if (expiryTime < new Date()) {
+            return false;
+        }
+        return true;
     }
 }

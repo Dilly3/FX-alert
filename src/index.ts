@@ -1,26 +1,33 @@
-import { config } from './secrets/secrets_manager';
-import { LogInfo } from './logger/google.cloud.logger';
-import { AppState, initializeApplication } from './router/app'; 
-import { setupRoutes } from './router/routes';
+import { LogInfo, LogError } from './logger/google.cloud.logger';
+import { initializeApplication } from './server/app'; 
+import { setupRoutes } from './server/routes';
 require('dotenv').config();
 
 
 Promise.resolve().then(async () => {
   try {
+    LogInfo("Starting application initialization...", {});
+    
     const { appState, secrets } = await initializeApplication();
-    // wait until app is ready
-    while (!appState.isAppReady) {  
-      LogInfo("app initializing.....",{});
-      await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Check if app is ready after initialization
+    if (!appState.isAppReady) {
+      LogError("Application failed to initialize properly", {});
+      process.exit(1);
     }
-    LogInfo("app initialized.....",{});
+    
+    LogInfo("Application initialized successfully", {});
 
     const app = setupRoutes(appState, secrets);
-    app.listen(process.env.PORT || 8080, () => {
-      LogInfo(`Server is running on port ${process.env.PORT || 8080}`,{});
+    const port = process.env.PORT || 8080;
+    
+    app.listen(port, () => {
+      LogInfo(`Server is running on port ${port}`, {});
+      LogInfo("All middleware and routes are active", {});
     });
+    
   } catch (error) {
-    LogInfo("Failed to initialize application:", error);
+    LogError("Failed to initialize application:", error);
     process.exit(1);
   }
 });

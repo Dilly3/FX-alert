@@ -256,3 +256,21 @@ resource "google_secret_manager_secret_version" "rate_limit_window" {
   secret = google_secret_manager_secret.rate_limit_window.id
   secret_data = var.rate_limit_window
 }
+
+resource "google_secret_manager_secret" "base_url" {
+  secret_id = "base_url"
+  labels = {
+    label = "fx-alert-secrets"
+  }
+  
+  replication {
+    auto {}
+  }
+
+  deletion_protection = false
+}
+
+resource "google_secret_manager_secret_version" "base_url" {
+  secret = google_secret_manager_secret.base_url.id
+  secret_data = var.base_url
+}

@@ -9,7 +9,7 @@ services:
     ports:
       - "7020:7020"
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=./service-account2-key.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/service-account2-key.json
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules

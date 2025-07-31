@@ -10,29 +10,27 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
     async firstOrCreate(currency: Currency): Promise<Currency> {
         try {
             // Use currency code as document ID for easier querying
-            const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.id);
+            const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.code);
             const doc = await docRef.get();
 
             if (doc.exists) {
                 // Document exists, return existing currency
                 const data = doc.data();
                 return {
-                    id: doc.id,
+                    code: doc.id,
                     name: data?.name || '',
                     ...data
                 } as Currency;
             } else {
                 // Document doesn't exist, create new one
                 await docRef.set({
-                    id: currency.id,
-                    name: currency.name,
                     code: currency.code,
+                    name: currency.name,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 });
 
                 return {
-                    id: currency.id,
                     code: currency.code,
                     name: currency.name
                 } as Currency;
@@ -53,9 +51,8 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
                 const batchCurrencies = currencies.slice(i, i + batchSize);
 
                 batchCurrencies.forEach(currency => {
-                    const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.id);
+                    const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.code);
                     batch.set(docRef, {
-                        id: currency.id,
                         name: currency.name,
                         code: currency.code,
                         createdAt: new Date().toISOString(),
@@ -73,9 +70,9 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
         }
     }
 
-    async getCurrency(id: string): Promise<Currency | null> {
+    async getCurrency(code: string): Promise<Currency | null> {
         try {
-            const docRef = this.db.collection(this.COLLECTION_NAME).doc(id);
+            const docRef = this.db.collection(this.COLLECTION_NAME).doc(code);
             const doc = await docRef.get();
 
             if (!doc.exists) {
@@ -84,29 +81,29 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
 
             const data = doc.data();
             return {
-                id: doc.id,
                 code: data?.code || '',
                 name: data?.name || '',
                 ...data
             } as Currency;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown error';
-            throw new Error(`Failed to get currency with id ${id}: ${message}`);
+            throw new Error(`Failed to get currency with code ${code}: ${message}`);
         }
     }
 
     async updateCurrency(currency: Currency): Promise<Currency> {
         try {
-            const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.id);
+            const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.code);
             
             // Check if document exists
             const doc = await docRef.get();
             if (!doc.exists) {
-                throw new Error(`Currency with id ${currency.id} not found`);
+                throw new Error(`Currency with code ${currency.code} not found`);
             }
 
             // Update the document
             await docRef.update({
+                code: currency.code,
                 name: currency.name,
                 updatedAt: new Date().toISOString()
             });
@@ -127,20 +124,20 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
         }
     }
 
-    async deleteCurrency(id: string): Promise<void> {
+    async deleteCurrency(code: string): Promise<void> {
         try {
-            const docRef = this.db.collection(this.COLLECTION_NAME).doc(id);
+            const docRef = this.db.collection(this.COLLECTION_NAME).doc(code);
             
             // Check if document exists before deleting
             const doc = await docRef.get();
             if (!doc.exists) {
-                throw new Error(`Currency with id ${id} not found`);
+                throw new Error(`Currency with code ${code} not found`);
             }
 
             await docRef.delete();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown error';
-            throw new Error(`Failed to delete currency with id ${id}: ${message}`);
+            throw new Error(`Failed to delete currency with code ${code}: ${message}`);
         }
     }
 
@@ -172,7 +169,7 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
         try {
             const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.code);
             await docRef.set({
-                id: currency.id,
+                id: currency.code,
                 name: currency.name,
                 code: currency.code,
                 createdAt: new Date().toISOString(),
@@ -193,7 +190,7 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
             currencies.forEach(currency => {
                 const docRef = this.db.collection(this.COLLECTION_NAME).doc();
                 batch.set(docRef, {
-                    id: currency.id,
+                    id: currency.code,
                     code: currency.code,
                     name: currency.name,
                     createdAt: new Date().toISOString(),
@@ -216,9 +213,9 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
             const results: DocumentReference<DocumentData>[] = [];
 
             currencies.forEach(currency => {
-                const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.id);
+                const docRef = this.db.collection(this.COLLECTION_NAME).doc(currency.code);
                 batch.set(docRef, {
-                    id: currency.id,
+                    id: currency.code,
                     code: currency.code,
                     name: currency.name,
                     createdAt: new Date().toISOString(),
@@ -248,7 +245,6 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
             snapshot.forEach(doc => {
                 const data = doc.data();
                 currencies.push({
-                    id: doc.id,
                     code: data?.code || '',
                     name: data?.name || '',
                     ...data
@@ -272,9 +268,9 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
         }
     }
 
-    async currencyExists(id: string): Promise<boolean> {
+    async currencyExists(code: string): Promise<boolean> {
         try {
-            const doc = await this.db.collection(this.COLLECTION_NAME).doc(id).get();
+            const doc = await this.db.collection(this.COLLECTION_NAME).doc(code).get();
             return doc.exists;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown error';

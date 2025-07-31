@@ -25,17 +25,43 @@ interface ConvertCurrencyResponse {
   };
   result: number;
 }
-
+interface LiveRatesRequest {
+  base: string;
+  currencies: string[];
+  email?: string;
+}
 interface LiveRatesResponse {
   success: boolean;
   base: string;
   timestamp: number;
   rates: Record<string, number>;
 }
+interface UserDto {
+  email: string;
+  baseCurrency: string;
+  targetCurrency: string;
+  pinExpiryTime: string;
+  isVerified: boolean;
+}
+interface CreateUserResponse {
+  success: boolean;
+  message: string;
+  user: UserDto;
+}
+
+interface VerifyUserDto {
+  email: string;
+  pin: string;
+}
+
+type CreateUserDto = {
+    email: string
+    baseCurrency: string
+    targetCurrency: string
+}
 
 
 
 
-
-export {UserCreateDto, CurrencyResponse, ConvertCurrencyResponse, LiveRatesResponse}
+export {CurrencyResponse, ConvertCurrencyResponse, LiveRatesResponse, VerifyUserDto, CreateUserDto, LiveRatesRequest, UserDto, CreateUserResponse}
 

@@ -1,0 +1,425 @@
+swagger: '2.0'
+info:
+  title: FX Alert API
+  description: |
+    FX Alert API provides real-time currency exchange rates, currency conversion, user can also register to get rates sent to their verified email.
+    A registered user will get to verify their email, once that is done, user can get rates sent to their mail.
+
+  version: 1.0.0
+  contact:
+    name: FX Alert Support
+    email: dil.anikamadu@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+host: fx-alert-770622112844.us-west1.run.app
+basePath: /v1
+schemes:
+  - https
+
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health Check
+      description: Check the health status of the application and database connections
+      tags:
+        - Health
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Application is ready and healthy
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "ready"
+              database:
+                type: string
+                example: "connected"
+              environment:
+                type: string
+                example: "GCP"
+        '503':
+          description: Application is initializing
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "initializing"
+              database:
+                type: string
+                example: "connected"
+              environment:
+                type: string
+                example: "GCP"
+
+  /currency/list:
+    get:
+      operationId: listCurrencies
+      summary: List Supported Currencies
+      description: Retrieve a list of all supported currencies and their symbols
+      tags:
+        - Currency
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: List of supported currencies retrieved successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Currencies retrieved"
+              currencies:
+                type: object
+                additionalProperties:
+                  type: string
+                example:
+                  USD: "US Dollar"
+                  EUR: "Euro"
+                  GBP: "British Pound"
+                  JPY: "Japanese Yen"
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /currency/convert:
+    get:
+      operationId: convertCurrency
+      summary: Convert Currency
+      description: Convert an amount from one currency to another using current or historical rates
+      tags:
+        - Currency
+      produces:
+        - application/json
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Source currency code (e.g., USD, EUR)
+          type: string
+          pattern: '^[A-Z]{3}$'
+        - name: to
+          in: query
+          required: true
+          description: Target currency code (e.g., EUR, GBP)
+          type: string
+          pattern: '^[A-Z]{3}$'
+        - name: amount
+          in: query
+          required: true
+          description: Amount to convert
+          type: number
+          minimum: 0
+        - name: date
+          in: query
+          required: false
+          description: Historical date for conversion (YYYY-MM-DD format)
+          type: string
+          format: date
+      responses:
+        '200':
+          description: Currency converted successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              response:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  query:
+                    type: object
+                    properties:
+                      from:
+                        type: string
+                      to:
+                        type: string
+                      amount:
+                        type: number
+                  info:
+                    type: object
+                    properties:
+                      quote:
+                        type: number
+                      timestamp:
+                        type: number
+                  result:
+                    type: number
+              success:
+                type: boolean
+        '400':
+          description: Bad request - invalid parameters
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /currency/rates:
+    get:
+      operationId: getLiveRates
+      summary: Get Live Exchange Rates
+      description: Get real-time exchange rates for specified currencies. Optionally send rates to email if user is verified.
+      tags:
+        - Currency
+      produces:
+        - application/json
+      parameters:
+        - name: base
+          in: query
+          required: true
+          description: Base currency code (e.g., USD, EUR)
+          type: string
+          pattern: '^[A-Z]{3}$'
+        - name: currencies
+          in: query
+          required: true
+          description: Comma-separated list of target currency codes
+          type: string
+          pattern: '^[A-Z]{3}(,[A-Z]{3})*$'
+        - name: email
+          in: query
+          required: false
+          description: Email address to send rates to (requires verified user)
+          type: string
+          format: email
+      responses:
+        '200':
+          description: Live rates retrieved successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              rates:
+                type: object
+                additionalProperties:
+                  type: number
+              success:
+                type: boolean
+        '400':
+          description: Bad request - email not verified
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              success:
+                type: boolean
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /user/register:
+    post:
+      operationId: createUser
+      summary: Create User Account
+      description: Create a new user account with email verification
+      tags:
+        - User Management
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: body
+          required: true
+          description: User account details
+          schema:
+            type: object
+            required:
+              - email
+              - baseCurrency
+              - targetCurrency
+            properties:
+              email:
+                type: string
+                format: email
+                description: User's email address
+                example: "user@example.com"
+              baseCurrency:
+                type: string
+                pattern: '^[A-Z]{3}$'
+                description: User's base currency preference
+                example: "USD"
+              targetCurrency:
+                type: string
+                pattern: '^[A-Z]{3}$'
+                description: User's target currency preference
+                example: "EUR"
+      responses:
+        '201':
+          description: User created successfully, verification email sent
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "User created, check your email for verification"
+              user:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: "123e4567-e89b-12d3-a456-426614174000"
+                  email:
+                    type: string
+                    format: email
+                    example: "user@example.com"
+                  baseCurrency:
+                    type: string
+                    example: "USD"
+                  targetCurrency:
+                    type: string
+                    example: "EUR"
+                  createdAt:
+                    type: string
+                    format: date-time
+                    example: "2024-01-15T10:30:00Z"
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-01-15T10:30:00Z"
+                  isVerified:
+                    type: boolean
+                    example: false
+              success:
+                type: boolean
+                example: true
+        '400':
+          description: Bad request - user already exists
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "User already exists"
+              success:
+                type: boolean
+                example: false
+        '500':
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /user/verify:
+    get:
+      operationId: verifyUser
+      summary: Verify User Account
+      description: Verify user account using the PIN sent to their email
+      tags:
+        - User Management
+      produces:
+        - application/json
+      parameters:
+        - name: email
+          in: query
+          required: true
+          description: User's email address
+          type: string
+          format: email
+        - name: pin
+          in: query
+          required: true
+          description: Verification PIN sent to user's email
+          type: string
+          pattern: '^[0-9]{6}$'
+      responses:
+        '200':
+          description: User verified successfully
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              success:
+                type: boolean
+        '400':
+          description: Bad request - user already verified
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              success:
+                type: boolean
+        '401':
+          description: Unauthorized - invalid PIN
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              success:
+                type: boolean
+        '404':
+          description: User not found
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              success:
+                type: boolean
+
+definitions:
+  ErrorResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        description: Error message
+      error:
+        type: string
+        description: Error type
+      success:
+        type: boolean
+
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Currency
+    description: Currency conversion and exchange rate endpoints
+  - name: User Management
+    description: User account management endpoints
+
+# GCP API Gateway specific extensions
+x-google-backend:
+  address: "https://fx-alert-770622112844.us-west1.run.app"
+
+x-google-management:
+  metrics:
+    - name: "fxalertapi.googleapis.com/request_count"
+      displayName: "Request Count"
+      valueType: "INT64"
+      metricKind: "DELTA"
+    - name: "fxalertapi.googleapis.com/request_latencies"
+      displayName: "Request Latency"
+      valueType: "DISTRIBUTION"
+      metricKind: "DELTA"
+
+x-google-quota:
+  limits:
+    - name: "fxalertapi.googleapis.com/requests_per_minute"
+      displayName: "Requests per minute"
+      freeTier: 2
+      maxLimit: 2
+    - name: "fxalertapi.googleapis.com/requests_per_day"
+      displayName: "Requests per day"
+      freeTier: 10
+      maxLimit: 10 
