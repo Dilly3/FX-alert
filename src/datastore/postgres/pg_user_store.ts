@@ -33,6 +33,11 @@ export class PgUserStore implements UserDataStore {
         }
     }
 
+    generatePin(): string {
+        // Generate a 6 digit pin
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
     async updatePin(email: string, pin: string): Promise<void> {
         try {
             const updateResult = await this.userRepository.update(
@@ -74,12 +79,22 @@ export class PgUserStore implements UserDataStore {
         }
     }
 
-    async verifyUser(email: string): Promise<void> {
+ validatePin(pin: string, user: UserInfo) : boolean {
+    if (pin !== user.verificationPin) {
+        return false;
+    }
+    if (user.pinExpiryTime < new Date()) {
+        return false;
+    }
+    return true;
+}
+
+ async verifyUser(email: string): Promise<void> {
         try {
             const updateResult = await this.userRepository.update(
                 { email },
-                { 
-                    isActive: true,
+                {   
+                    isVerified: true,
                     verificationPin: '',
                     updatedAt: new Date()
                 }
@@ -103,14 +118,14 @@ export class PgUserStore implements UserDataStore {
         }
     }
 
-    async getUser(id: string): Promise<UserInfo | null> {
+    async getUser(email: string): Promise<UserInfo | null> {
         try {
             return await this.userRepository.findOne({
-                where: { id }
+                where: { email }
             });
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Unknown error';
-            throw new Error(`Failed to get user with id ${id}: ${message}`);
+            throw new Error(`Failed to get user with email ${email}: ${message}`);
         }
     }
 

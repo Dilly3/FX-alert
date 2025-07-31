@@ -28,6 +28,8 @@ export interface UserDataStore {
     getUser(email: string): Promise<UserInfo | null>;
     updateUser(user: UserInfo): Promise<UserInfo>;
     deleteUser(id: string): Promise<void>;
+    validatePin(pin: string, user: UserInfo): boolean;
+    generatePin(): string;
 } 
 
 let currencyDataStore: CurrencyDataStore | null = null;
@@ -39,22 +41,34 @@ export function getCurrencyDataStore(dbpg: DataSource | null, dbFirestore: Fires
         return currencyDataStore;
     }
     if (isGCP) {
-        currencyDataStore = new FirestoreCurrencyStore(dbFirestore!);
-    }else{
-        currencyDataStore = new PgCurrencyStore(dbpg!);
+        if (!dbFirestore) {
+            throw new Error("Firestore connection not available for GCP environment");
+        }
+        currencyDataStore = new FirestoreCurrencyStore(dbFirestore);
+    } else {
+        if (!dbpg) {
+            throw new Error("PostgreSQL connection not available for local environment");
+        }
+        currencyDataStore = new PgCurrencyStore(dbpg);
     }
     return currencyDataStore;
 }
 
 export function getUserStore(dbpg: DataSource | null, dbFirestore: Firestore | null): UserDataStore {
    const isGCP = isRunningInGCP();
-if(userDataStore){
+   if(userDataStore){
         return userDataStore;
     }
     if (isGCP) {
-        userDataStore = new FirestoreUserStore(dbFirestore!);
-    }else{
-        userDataStore = new PgUserStore(dbpg!);
+        if (!dbFirestore) {
+            throw new Error("Firestore connection not available for GCP environment");
+        }
+        userDataStore = new FirestoreUserStore(dbFirestore);
+    } else {
+        if (!dbpg) {
+            throw new Error("PostgreSQL connection not available for local environment");
+        }
+        userDataStore = new PgUserStore(dbpg);
     }
     return userDataStore;
 }
