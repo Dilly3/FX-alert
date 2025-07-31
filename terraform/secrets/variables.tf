@@ -52,3 +52,7 @@ type = number
 variable "rate_limit_window" {
 type = number
 }
+
+variable "base_url" {
+type = string
+}
