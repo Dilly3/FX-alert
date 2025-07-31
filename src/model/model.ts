@@ -1,12 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, PrimaryColumn, Unique } from "typeorm"
-
 @Entity()
 export class Currency {
-
-    @PrimaryColumn()
-    @Unique(['id'])
-    id! : string
-    @Column()
+    @PrimaryColumn({unique: true})
     code! : string
     @Column()
     name! : string
@@ -21,47 +16,39 @@ export class CurrencyRate {
     toCurrency! : string
     @Column()
     rate! : number
-    @PrimaryColumn()
+    @Column({unique: true})
     alias! : string
 }
-
-
 @Entity()
 export class UserInfo {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    @Column()
-    firstName! : string
-
-    @Column()
-    lastName!: string
-
-    @Column()
+    @Column({unique: true})
     email! : string
 
     @Column()
-    fromCurrency! : string
+    baseCurrency! : string
 
     @Column()
-    toCurrency! : string
-
-    @Column()
-    preferences! : string
+    targetCurrency! : string
 
     @Column()
     createdAt! : Date
 
     @Column()
     updatedAt! : Date
-
     @Column()
     verificationPin! : string
 
     @Column()
-    isActive! : boolean
-    
-} 
+    pinExpiryTime! : Date
+
+    @Column()
+    isVerified! : boolean
+
+}
+
 
 export enum collection {
     CURRENCY = "currencies",
