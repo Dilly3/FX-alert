@@ -19,6 +19,11 @@
 
 **Tech Stack:** TypeScript, Express.js, PostgreSQL, Firestore, Redis, SendGrid, Docker, Terraform, GCP
 
+## 🏗️ Architecture
+
+![System Architecture](./architech.png)
+
+
 ## 📚 API Documentation
 ## [**Readme.io**](https://fx-alert.readme.io/reference/getting-started#/)
 
@@ -46,6 +51,7 @@ FX-alert/
 ├── docker-compose.yml      # Local development setup
 └── deploy.sh              # Deployment script
 ```
+
 
 ## 📄 License
 
