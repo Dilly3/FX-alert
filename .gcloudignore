@@ -13,3 +13,10 @@ tsconfig.json
 Dockerfile.dev
 docker-compose.yml
 variables.tfvars
+cost-optimization-guide.md
+monitor-costs.sh
+
+cache-[implementation|comparison]*
+firestore-*.md
+
+redis-[cache|cloud]*
