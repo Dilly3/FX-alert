@@ -31,7 +31,7 @@ export class UserInfo {
     baseCurrency! : string
 
     @Column()
-    targetCurrency! : string
+    targetCurrency! : string[]
 
     @Column()
     createdAt! : Date
