@@ -1,6 +1,7 @@
 import { DataSource, Repository } from "typeorm";
 import { Currency } from "../../model/model";
 import { CurrencyDataStore } from "../datastore";
+import { RedisClient } from "../redis/redis";
 
 export class PgCurrencyStore implements CurrencyDataStore {
     private readonly currencyRepository: Repository<Currency>;
