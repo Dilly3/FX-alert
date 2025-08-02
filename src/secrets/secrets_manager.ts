@@ -21,6 +21,11 @@ forex_api_key : string
 rate_limit_max : number
 rate_limit_window : number
 base_url : string
+redis_host : string
+redis_port : number
+redis_password : string
+redis_username : string
+redis_ttl_hr : number
 }
 
 async function getSecret(secretName: string): Promise<string> {
@@ -68,7 +73,12 @@ export async function loadGCPSecrets(): Promise<config> {
     firestoreDatabaseId,
     rateLimitMax,
     rateLimitWindow,
-    baseUrl
+    baseUrl,
+    redisHost,
+    redisPort,
+    redisPassword,
+    redisUsername,
+    redisTtlHr
   ] = await Promise.all([
     getSecret('database_password'),
     getSecret('database_user'),
@@ -84,7 +94,12 @@ export async function loadGCPSecrets(): Promise<config> {
     getSecret('database_id'),
     getSecret('rate_limit_max'),
     getSecret('rate_limit_window'),
-    getSecret('base_url')
+    getSecret('base_url'),
+    getSecret('redis_host'),
+    getSecret('redis_port'),
+    getSecret('redis_password'),
+    getSecret('redis_username'),
+    getSecret('redis_ttl_hr')
   ]);
 
   const env = process.env.ENV!;
@@ -107,7 +122,12 @@ export async function loadGCPSecrets(): Promise<config> {
     firestore_database_id: firestoreDatabaseId,
     rate_limit_max: parseInt(rateLimitMax),
     rate_limit_window: parseInt(rateLimitWindow),
-    base_url: baseUrl
+    base_url: baseUrl,
+    redis_host: redisHost,
+    redis_port: parseInt(redisPort),
+    redis_password: redisPassword,
+    redis_username: redisUsername,
+    redis_ttl_hr: parseInt(redisTtlHr)
   }
   default_config = config
   return config
@@ -129,6 +149,11 @@ export async function loadENVSecrets():Promise<config>{
   const rateLimitMax = process.env.RATE_LIMIT_MAX!;
   const rateLimitWindow = process.env.RATE_LIMIT_WINDOW!;
   const baseUrl = process.env.BASE_URL!;
+  const redisHost = process.env.REDIS_HOST!;
+  const redisPort = process.env.REDIS_PORT!;
+  const redisPassword = process.env.REDIS_PASSWORD!;
+  const redisUsername = process.env.REDIS_USERNAME!;
+  const redisTtlHr = process.env.REDIS_TTL_HR!;
   const config = {
     env: env,
     host: dbHost,
@@ -146,7 +171,12 @@ export async function loadENVSecrets():Promise<config>{
     firestore_database_id: "",
     rate_limit_max: parseInt(rateLimitMax),
     rate_limit_window: parseInt(rateLimitWindow),
-    base_url: baseUrl
+    base_url: baseUrl,
+    redis_host: redisHost,
+    redis_port: parseInt(redisPort),
+    redis_password: redisPassword,
+    redis_username: redisUsername,
+    redis_ttl_hr: parseInt(redisTtlHr)
   }
   default_config = config
   return config
