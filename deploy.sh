@@ -27,14 +27,16 @@ gcloud run deploy $PROJECT_NAME --source . --region us-west1 --allow-unauthentic
   --vpc-connector=projects/fs-alert-d4f21/locations/us-west1/connectors/fx-alert-vpc-connector \
   --vpc-egress=private-ranges-only \
   --region=us-west1 \
-  --memory=512Mi \
-  --cpu=2 \
-  --timeout=3600 \
-  --max-instances=2 --set-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
+  --memory=256Mi \
+  --cpu=1 \
+  --timeout=300 \
+  --min-instances=0 \
+  --max-instances=2 \
+  --concurrency=80 \
+  --set-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
   --set-env-vars ENV=$ENV \
   --region us-west1 \
   --allow-unauthenticated
-
 
 echo "deployed to $PROJECT_NAME"
 
