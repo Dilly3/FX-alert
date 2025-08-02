@@ -56,3 +56,23 @@ type = number
 variable "base_url" {
 type = string
 }
+
+variable "redis_host" {
+type = string
+}
+
+variable "redis_port" {
+type = number
+}
+
+variable "redis_password" {
+type = string
+}
+
+variable "redis_username" {
+type = string
+}
+
+variable "redis_ttl_hr" {
+type = number
+}
