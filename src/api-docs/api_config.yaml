@@ -256,10 +256,12 @@ paths:
                 description: User's base currency preference
                 example: "USD"
               targetCurrency:
-                type: string
-                pattern: '^[A-Z]{3}$'
-                description: User's target currency preference
-                example: "EUR"
+                type: array
+                items:
+                  type: string
+                  pattern: '^[A-Z]{3}$'
+                description: User's target currency preference(s) - array of currency codes (can contain single or multiple codes)
+                example: ["EUR", "GBP", "JPY"]
       responses:
         '201':
           description: User created successfully, verification email sent
@@ -284,8 +286,10 @@ paths:
                     type: string
                     example: "USD"
                   targetCurrency:
-                    type: string
-                    example: "EUR"
+                    type: array
+                    items:
+                      type: string
+                    example: ["EUR", "GBP", "JPY"]
                   createdAt:
                     type: string
                     format: date-time

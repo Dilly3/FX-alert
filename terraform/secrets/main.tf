@@ -274,3 +274,93 @@ resource "google_secret_manager_secret_version" "base_url" {
   secret = google_secret_manager_secret.base_url.id
   secret_data = var.base_url
 }
+
+resource "google_secret_manager_secret" "redis_host" {
+  secret_id = "redis_host"
+  labels = {
+    label = "fx-alert-secrets"
+  }
+  
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "redis_host" {
+  secret = google_secret_manager_secret.redis_host.id
+  secret_data = var.redis_host
+}
+
+resource "google_secret_manager_secret" "redis_port" {  
+  secret_id = "redis_port"
+  labels = {
+    label = "fx-alert-secrets"
+  }
+  
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "redis_port" {  
+  secret = google_secret_manager_secret.redis_port.id
+  secret_data = var.redis_port
+}
+
+resource "google_secret_manager_secret" "redis_password" {  
+  secret_id = "redis_password"
+  labels = {
+    label = "fx-alert-secrets"
+  }
+
+  replication {
+    auto {}
+  }
+
+  deletion_protection = false
+
+}
+
+resource "google_secret_manager_secret_version" "redis_password" {  
+  secret = google_secret_manager_secret.redis_password.id
+  secret_data = var.redis_password
+}
+
+resource "google_secret_manager_secret" "redis_username" {  
+  secret_id = "redis_username"
+  labels = {
+    label = "fx-alert-secrets"
+  }
+
+  replication {
+    auto {}
+  }
+
+  deletion_protection = false
+}
+
+resource "google_secret_manager_secret_version" "redis_username" {  
+  secret = google_secret_manager_secret.redis_username.id
+  secret_data = var.redis_username
+}
+
+resource "google_secret_manager_secret" "redis_ttl_hr" {  
+  secret_id = "redis_ttl_hr"
+  labels = {
+    label = "fx-alert-secrets"
+  }
+
+  replication {
+    auto {}
+  }
+
+  deletion_protection = false
+}
+
+resource "google_secret_manager_secret_version" "redis_ttl_hr" {  
+  secret = google_secret_manager_secret.redis_ttl_hr.id
+  secret_data = var.redis_ttl_hr
+}
+
+
+

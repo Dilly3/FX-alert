@@ -25,6 +25,13 @@ interface ConvertCurrencyResponse {
   };
   result: number;
 }
+
+interface ConvertCurrencyRequest {
+from : string;
+to : string;
+amount: string;
+date?: string;
+}
 interface LiveRatesRequest {
   base: string;
   currencies: string[];
@@ -39,7 +46,7 @@ interface LiveRatesResponse {
 interface UserDto {
   email: string;
   baseCurrency: string;
-  targetCurrency: string;
+  targetCurrency: string[];
   pinExpiryTime: string;
   isVerified: boolean;
 }
@@ -57,11 +64,11 @@ interface VerifyUserDto {
 type CreateUserDto = {
     email: string
     baseCurrency: string
-    targetCurrency: string
+    targetCurrency: string | string[]
 }
 
 
 
 
-export {CurrencyResponse, ConvertCurrencyResponse, LiveRatesResponse, VerifyUserDto, CreateUserDto, LiveRatesRequest, UserDto, CreateUserResponse}
+export {CurrencyResponse, ConvertCurrencyResponse, ConvertCurrencyRequest,LiveRatesResponse, VerifyUserDto, CreateUserDto, LiveRatesRequest, UserDto, CreateUserResponse}
 

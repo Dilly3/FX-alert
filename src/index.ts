@@ -1,4 +1,4 @@
-import { LogInfo, LogError } from './logger/google.cloud.logger';
+import { LogInfo, LogError } from './logger/gcp_logger';
 import { initializeApplication } from './server/app'; 
 import { setupRoutes } from './server/routes';
 require('dotenv').config();

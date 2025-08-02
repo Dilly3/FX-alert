@@ -10,3 +10,10 @@ tsconfig.tsbuildinfo
 .terraform
 .terraform.lock.hcl
 variables.auto.tfvars
+cost-optimization-guide.md
+monitor-costs.sh
+
+cache-[implementation|comparison]*
+firestore-*.md
+
+redis-[cache|cloud]*

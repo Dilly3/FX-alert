@@ -1,8 +1,9 @@
-import { ConvertCurrencyResponse, CurrencyResponse, LiveRatesResponse } from "../../model/dtos";
+import { ConvertCurrencyRequest, ConvertCurrencyResponse, CurrencyResponse, LiveRatesRequest, LiveRatesResponse } from "../../model/dtos";
 import { Currency } from "../../model/model";
 import { CurrencyDataStore } from "../../datastore/datastore";
 import axios from "axios";
-import { LogError } from "../../logger/google.cloud.logger";
+import { LogError, LogInfo } from "../../logger/gcp_logger";
+import { RedisClient } from "../../datastore/redis/redis";
 
 
 
@@ -16,7 +17,7 @@ formatCurrency(amount: number): string {
   return this.formatter.format(amount);
 }
 
-    constructor(private readonly apiKey: string, private readonly currencyDataStore: CurrencyDataStore) {}
+    constructor(private readonly apiKey: string, private readonly currencyDataStore: CurrencyDataStore, private readonly redisClient : RedisClient ) {}
 
     async getSupportedCurrencies(): Promise<CurrencyResponse> {
         // check database first
@@ -72,6 +73,20 @@ async verifyCurrency(code: string): Promise<boolean> {
 }
 
 async convertCurrency(from: string, to: string, amount: number, date?: string): Promise<ConvertCurrencyResponse> {
+// Check Redis cache first
+let req : ConvertCurrencyRequest = {
+from : from,
+to : to,
+amount : amount.toString(),
+date: date ? date : ""
+}
+const cachedRate = await this.redisClient.getConvertCurrency(req);
+if (cachedRate) {
+LogInfo("returning cached rate", "convert currency")
+  return cachedRate
+}
+
+
   const params = new URLSearchParams();
   params.append('api_key', this.apiKey);
   params.append('from', from);
@@ -86,6 +101,8 @@ async convertCurrency(from: string, to: string, amount: number, date?: string): 
   }
 try {
   const response = await axios.get<ConvertCurrencyResponse>(`https://api.forexrateapi.com/v1/convert?${params.toString()}`);
+// Cache the response
+  await this.redisClient.setConvertCurrency(req, response.data);
   return response.data;
 } catch (error) {
   LogError('Error converting currency:', error);
@@ -95,14 +112,33 @@ try {
 
 async getLiveRates(base: string, currencies: string[] | string): Promise<LiveRatesResponse> {
 
-  const params = new URLSearchParams();
-  params.append('api_key', this.apiKey);
-  params.append('base', base);
-if (currencies) {
-  params.append('currencies', Array.isArray(currencies) ? currencies.join(',') : currencies);
+// convert currencies to array
+const currenciesArray = Array.isArray(currencies) ? currencies : [currencies];
+
+let req : LiveRatesRequest = {
+base: base,
+currencies: currenciesArray
+}
+
+// Check Redis cache first
+const cachedRate = await this.redisClient.getCurrencyRate(req);
+if (cachedRate) {
+LogInfo("returning cached rate", "live rates")
+  return cachedRate
+}
+// if not cached, fetch from API
+console.log(`Fetching fresh rates for ${base} to ${currenciesArray.join(',')}`);
+const params = new URLSearchParams();
+params.append('api_key', this.apiKey);
+params.append('base', base);
+if (currenciesArray.length > 0) {
+  params.append('currencies', currenciesArray.join(','));
 }
 try {
   const response = await axios.get<LiveRatesResponse>(`https://api.forexrateapi.com/v1/latest?${params.toString()}`);
+  
+  // Cache the response
+  await this.redisClient.setCurrencyRate(req, response.data);
   return response.data;
 } catch (error) {
   LogError('Error getting live rates:', error);

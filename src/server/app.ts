@@ -2,13 +2,14 @@ import { loadSecrets } from "../secrets/secrets_manager";
 import { isRunningInGCP } from "../secrets/secrets_manager";
 import { initializeFirestore } from "../datastore/firestore/store";
 import { initializePgDB } from "../datastore/postgres/pg_store";
-import { LogError, LogInfo } from "../logger/google.cloud.logger";
+import { LogError, LogInfo } from "../logger/gcp_logger";
 import { config } from "../secrets/secrets_manager";
 import { Firestore } from "@google-cloud/firestore";
 import { DataSource } from "typeorm";
 import { CurrencyDataStore, getCurrencyDataStore, UserDataStore, getUserStore } from "../datastore/datastore";
 import { ForexApi } from "../fx/forex_api/forex_api";
 import { SendGrid } from "../mailer/sendgrid/sendgrid";
+import { RedisClient } from "../datastore/redis/redis";
 
 export interface AppState {
   dbFirestore: Firestore;
@@ -18,6 +19,7 @@ export interface AppState {
   forexApi: ForexApi;
   sendgrid: SendGrid;
   isAppReady: boolean;
+  redis: RedisClient;
 }
 
 
@@ -30,7 +32,8 @@ export async function initializeApplication() : Promise<{appState: AppState, sec
     currencyStore: null!,
     forexApi: null!,
     sendgrid: null!,
-    isAppReady: false
+    isAppReady: false,
+    redis: null!
   };
 
   try {
@@ -65,7 +68,12 @@ export async function initializeApplication() : Promise<{appState: AppState, sec
 
     appState.userStore = getUserStore(appState.dbPG, appState.dbFirestore);
     appState.currencyStore = getCurrencyDataStore(appState.dbPG, appState.dbFirestore);
-    appState.forexApi = new ForexApi(secrets!.forex_api_key, appState.currencyStore!);
+    
+    // Initialize Redis client first
+    appState.redis = new RedisClient(secrets!.redis_host, secrets!.redis_port, secrets!.redis_password, secrets!.redis_username, secrets!.redis_ttl_hr);
+    
+    // Then initialize ForexApi with Redis client
+    appState.forexApi = new ForexApi(secrets!.forex_api_key, appState.currencyStore!, appState.redis);
     appState.sendgrid = new SendGrid(secrets!);
     LogInfo("Stores initialized successfully",{});
 

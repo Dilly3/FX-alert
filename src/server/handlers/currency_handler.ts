@@ -1,5 +1,5 @@
 import { ForexApi } from "../../fx/forex_api/forex_api";
-import { LogError } from "../../logger/google.cloud.logger";
+import { LogError } from "../../logger/gcp_logger";
 import express, { Request, Response, Express } from "express";
 import { LiveRatesRequest } from "../../model/dtos";
 import { SendGrid } from "../../mailer/sendgrid/sendgrid";
