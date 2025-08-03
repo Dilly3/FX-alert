@@ -1,5 +1,5 @@
 import { Firestore } from "@google-cloud/firestore";
-import { Currency, UserInfo } from "../model/model";
+import { Currency, UserInfo, ErrorLog } from "../model/model";
 import { FirestoreCurrencyStore } from "./firestore/currency_store";
 import { PgCurrencyStore } from "./postgres/pg_currency_store";
 import { DataSource } from "typeorm";
@@ -8,6 +8,8 @@ import { FirestoreUserStore } from "./firestore/user_store";
 import { default_config, isRunningInGCP } from "../secrets/secrets_manager";
 import { initializePgDB } from "./postgres/pg_store";
 import { initializeFirestore } from "./firestore/store";
+import { FirestoreErrorLogStore } from "./firestore/error_log";
+import { pgErrorLogStore } from "./postgres/pg_error_log";
 
 
 export interface CurrencyDataStore {
@@ -26,14 +28,21 @@ export interface UserDataStore {
     verifyUser(email: string): Promise<void>;
     saveUser(user: UserInfo): Promise<UserInfo>;
     getUser(email: string): Promise<UserInfo | null>;
+    getVerifiedUsers():Promise<UserInfo[]>;
     updateUser(user: UserInfo): Promise<UserInfo>;
     deleteUser(id: string): Promise<void>;
     validatePin(pin: string, user: UserInfo): boolean;
+groupUsersByCurrency(users: UserInfo[]): Map<string, any[]> 
     generatePin(): string;
 } 
 
+export interface ErrorLogStore {
+saveError(error: ErrorLog): Promise<void>
+}
+
 let currencyDataStore: CurrencyDataStore | null = null;
 let userDataStore: UserDataStore | null = null;
+let errorLogStore : ErrorLogStore | null = null
 
 export function getCurrencyDataStore(dbpg: DataSource | null, dbFirestore: Firestore | null): CurrencyDataStore {
     const isGCP = isRunningInGCP();
@@ -73,6 +82,25 @@ export function getUserStore(dbpg: DataSource | null, dbFirestore: Firestore | n
     return userDataStore;
 }
 
+export function getErrorLogStore(dbpg: DataSource | null, dbFirestore: Firestore | null): ErrorLogStore {
+   const isGCP = isRunningInGCP();
+   if(errorLogStore){
+        return errorLogStore;
+    }
+    if (isGCP) {
+        if (!dbFirestore) {
+            throw new Error("Firestore connection not available for GCP environment");
+        }
+        errorLogStore = new FirestoreErrorLogStore(dbFirestore);
+    } else {
+        if (!dbpg) {
+            throw new Error("PostgreSQL connection not available for local environment");
+        }
+        errorLogStore = new pgErrorLogStore(dbpg);
+    }
+    return errorLogStore;
+}
+
 export async function initializeDatabases(dbFirestore: Firestore | null, dbPG: DataSource | null){
 try{
 const isGCP = isRunningInGCP();
@@ -88,3 +116,5 @@ const isGCP = isRunningInGCP();
   process.exit(1);
 }
 }
+
+
