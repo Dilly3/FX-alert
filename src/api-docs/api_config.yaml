@@ -5,6 +5,11 @@ info:
     FX Alert API provides real-time currency exchange rates, currency conversion, user can also register to get rates sent to their verified email.
     A registered user will get to verify their email, once that is done, user can get rates sent to their mail.
 
+    Rate limiting is implemented at the backend level based
+    - v1/currency/list: 10 requests per 20 minutes per IP
+    - v1/currency/convert: 10 requests per 20 minutes per IP
+    - v1/currency/rates: 3 requests per 15 minutes per IP
+
   version: 1.0.0
   contact:
     name: FX Alert Support
