@@ -1,15 +1,35 @@
 steps:
-  # Build Docker image (includes TypeScript compilation)
+  # Build development image
   - name: 'gcr.io/cloud-builders/docker'
     args: 
       - 'build'
+      - '-f'
+      - 'Dockerfile.dev'
       - '-t'
-      - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
+      - 'gcr.io/fs-alert-d4f21/fx-alert:dev-$COMMIT_SHA'
       - '.'
+    id: 'build-dev'
 
-  # Push to Container Registry
+  # Build production image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA']
+    args: 
+      - 'build'
+      - '-f'
+      - 'Dockerfile.cloud'
+      - '-t'
+      - 'gcr.io/fs-alert-d4f21/fx-alert:prod-$COMMIT_SHA'
+      - '.'
+    id: 'build-prod'
+
+    # Push production image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/fs-alert-d4f21/fx-alert:prod-$COMMIT_SHA']
+    waitFor: ['build-prod']
+
+   # Push development image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/fs-alert-d4f21/fx-alert:dec-$COMMIT_SHA']
+    waitFor: ['build-dev']
 
   # Deploy to Cloud Run
   - name: 'gcr.io/cloud-builders/gcloud'
@@ -18,7 +38,7 @@ steps:
       - 'deploy'
       - 'fx-alert-z'
       - '--image'
-      - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
+      - 'gcr.io/fs-alert-d4f21/fx-alert:prod-$COMMIT_SHA'
       - '--region'
       - 'us-west1'
       - '--allow-unauthenticated'
@@ -28,4 +48,5 @@ steps:
       - 'ENV=prod'
 
 images:
-  - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
+  - 'gcr.io/fs-alert-d4f21/fx-alert:prod-$COMMIT_SHA'
+  - 'gcr.io/fs-alert-d4f21/fx-alert:dev-$COMMIT_SHA'

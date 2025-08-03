@@ -14,5 +14,8 @@ COPY . .
 # Expose the port
 EXPOSE 7020
 
+ENV GOOGLE_CLOUD_PROJECT=fs-alert-d4f21
+ENV ENV=dev
+
 # Use nodemon for development with hot reload
 CMD ["npm", "run", "dev"]
