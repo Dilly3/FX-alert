@@ -49,8 +49,26 @@ export class UserInfo {
 
 }
 
+@Entity()
+export class ErrorLog {
+    @PrimaryGeneratedColumn("uuid")
+    id!: string;
+
+    @Column()
+    operation!: string;
+
+    @Column()
+    date!: Date;
+
+    @Column()
+    errorMessage!: string;
+
+    @Column()
+    createdAt!: Date;
+}
 
 export enum collection {
     CURRENCY = "currencies",
-    USER = "users"
+    USER = "users",
+    ERROR_LOG = "error_logs"
 }
