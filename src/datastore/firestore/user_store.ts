@@ -1,5 +1,5 @@
-import { Firestore } from "@google-cloud/firestore";
-import { UserInfo, collection } from "../../model/model";
+import { Firestore, QueryDocumentSnapshot } from "@google-cloud/firestore";
+import { UserInfo, collection, ErrorLog } from "../../model/model";
 import { UserDataStore } from "../datastore";
 
 
@@ -316,6 +316,67 @@ export class FirestoreUserStore implements UserDataStore {
         }
     }
 
+private async getVerifiedUsersPaginated(pageSize = 50, lastDoc?: any): Promise<{users: UserInfo[], lastDoc: any}> {
+    try {
+        let query = this.db.collection(this.COLLECTION_NAME)
+            .where('isVerified', '==', true)
+            .orderBy('createdAt', 'desc')
+            .limit(pageSize);
+
+        if (lastDoc) {
+            query = query.startAfter(lastDoc);
+        }
+
+        const snapshot = await query.get();
+
+        const users: UserInfo[] = [];
+        let lastDocument = null;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            users.push({
+                id: doc.id,
+                ...data
+            } as UserInfo);
+            lastDocument = doc;
+        });
+
+        return { users, lastDoc: lastDocument };
+    } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error';
+        throw new Error(`Failed to get verified users: ${message}`);
+    }
+}
+
+
+async getAllVerifiedUsers(): Promise<UserInfo[]> {
+    const allUsers: UserInfo[] = [];
+    let lastDoc: any = null;
+    let hasMore = true;
+    const pageSize = 50; 
+
+    while (hasMore) {
+        try {
+            const result = await this.getVerifiedUsersPaginated(pageSize, lastDoc);
+            
+            allUsers.push(...result.users);
+            
+            lastDoc = result.lastDoc;
+            
+            hasMore = result.users.length === pageSize;
+            
+            console.log(`Fetched ${result.users.length} verified users, total: ${allUsers.length}`);
+            
+        } catch (error) {
+            console.error('Error fetching verified users page:', error);
+            throw error;
+        }
+    }
+
+    return allUsers;
+}
+
+
     async getVerifiedUsers(): Promise<UserInfo[]> {
         try {
             const snapshot = await this.db.collection(this.COLLECTION_NAME)
@@ -410,4 +471,22 @@ export class FirestoreUserStore implements UserDataStore {
         }
         return true;
     }
+
+  groupUsersByCurrency(users: UserInfo[]): Map<string, any[]> {
+        const groups = new Map<string, UserInfo[]>();
+        
+        users.forEach(user => {
+                  const key = Array.isArray(user.targetCurrency) ? 
+`${user.baseCurrency}_${user.targetCurrency.sort().join(',')}` : 
+`${user.baseCurrency}_${user.targetCurrency}`
+            if (!groups.has(key)) {
+                groups.set(key, []);
+            }
+            groups.get(key)!.push(user);
+        });
+
+        return groups;
+    }
+
+
 }

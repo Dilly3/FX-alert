@@ -1,5 +1,5 @@
 import { Firestore, DocumentReference, DocumentData } from "@google-cloud/firestore";
-import { Currency, collection } from "../../model/model";
+import { Currency, UserInfo, collection } from "../../model/model";
 import { CurrencyDataStore } from "../datastore";
 
 export class FirestoreCurrencyStore implements CurrencyDataStore {
@@ -277,4 +277,6 @@ export class FirestoreCurrencyStore implements CurrencyDataStore {
             throw new Error(`Failed to check if currency exists: ${message}`);
         }
     }
+
+
 }
