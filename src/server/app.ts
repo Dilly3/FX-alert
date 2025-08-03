@@ -6,7 +6,7 @@ import { LogError, LogInfo } from "../logger/gcp_logger";
 import { config } from "../secrets/secrets_manager";
 import { Firestore } from "@google-cloud/firestore";
 import { DataSource } from "typeorm";
-import { CurrencyDataStore, getCurrencyDataStore, UserDataStore, getUserStore } from "../datastore/datastore";
+import { CurrencyDataStore, ErrorLogStore,getCurrencyDataStore, UserDataStore, getUserStore, getErrorLogStore } from "../datastore/datastore";
 import { ForexApi } from "../fx/forex_api/forex_api";
 import { SendGrid } from "../mailer/sendgrid/sendgrid";
 import { RedisClient } from "../datastore/redis/redis";
@@ -17,6 +17,7 @@ export interface AppState {
   userStore: UserDataStore;
   currencyStore: CurrencyDataStore;
   forexApi: ForexApi;
+errorLog : ErrorLogStore;
   sendgrid: SendGrid;
   isAppReady: boolean;
   redis: RedisClient;
@@ -32,6 +33,7 @@ export async function initializeApplication() : Promise<{appState: AppState, sec
     currencyStore: null!,
     forexApi: null!,
     sendgrid: null!,
+errorLog : null!,
     isAppReady: false,
     redis: null!
   };
@@ -68,6 +70,7 @@ export async function initializeApplication() : Promise<{appState: AppState, sec
 
     appState.userStore = getUserStore(appState.dbPG, appState.dbFirestore);
     appState.currencyStore = getCurrencyDataStore(appState.dbPG, appState.dbFirestore);
+appState.errorLog = getErrorLogStore(appState.dbPG, appState.dbFirestore)
     
     // Initialize Redis client first
     appState.redis = new RedisClient(secrets!.redis_host, secrets!.redis_port, secrets!.redis_password, secrets!.redis_username, secrets!.redis_ttl_hr);

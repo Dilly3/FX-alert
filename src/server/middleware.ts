@@ -11,7 +11,7 @@ export function RateLimiting(secrets: config): RateLimitRequestHandler {
     message: `too many requests, try again in ${secrets!.rate_limit_window} secs.`,
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => { // Remove 'next' parameter
+    handler: (req, res) => { 
       console.log(`Rate limit exceeded for IP: ${req.ip} on path: ${req.path}`);
       res.status(429).json({
         error: 'Too many requests',
@@ -20,6 +20,13 @@ export function RateLimiting(secrets: config): RateLimitRequestHandler {
       });
     }
   });
+}
+
+export function LogIP(){
+return (req :Request , res : Response, next : NextFunction) => {
+console.log('Client IP:', req.ip);
+next()
+}
 }
 
 export function RateLimitingEmail(secrets: config): RateLimitRequestHandler {

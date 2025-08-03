@@ -2,7 +2,7 @@ import { rateLimit } from 'express-rate-limit';
 import { AppState } from "./app";
 import express, { Express } from "express";
 import { newCurrencyHandler } from "./handlers/currency_handler";
-import { ensureAppReady, RateLimiting, RateLimitingEmail } from "./middleware";
+import { ensureAppReady, RateLimiting, RateLimitingEmail, LogIP } from "./middleware";
 import { healthCheck } from "./handlers/health_handler";
 import { config } from "../secrets/secrets_manager";
 import { newUserHandler } from "./handlers/user_handler";
@@ -14,6 +14,8 @@ const cors = require('cors');
 export function setupRoutes(appState: AppState, secrets: config) : Express {
 const app: Express = express();
 app.use(express.json());
+// trust the first proxy (GCP API Gateway) 
+app.set('trust proxy', 1);
 app.use(ensureAppReady(appState!));
 //TODO: Update cors origin for prod
 const corsOptions = {
@@ -21,13 +23,14 @@ const corsOptions = {
   credentials: true
 };
 
-const currencyHandler = newCurrencyHandler(appState!.forexApi!, appState!.sendgrid!, appState!.userStore!);
+const currencyHandler = newCurrencyHandler(appState!.forexApi!, appState!.sendgrid!, appState!.userStore!, appState!.errorLog);
 const userHandler = newUserHandler(appState!.userStore!, appState!.sendgrid!, secrets!);
 
+// Middlewares
 app.use(cors(corsOptions));
+app.use(LogIP())
 app.use(RateLimiting(secrets!));
 app.use(ensureAppReady(appState!));
-
 
 
 
@@ -48,13 +51,13 @@ v1CurrencyEmailRouter.use(RateLimitingEmail(secrets!));
 v1CurrencyEmailRouter.get('/rates', currencyHandler.getLiveRates());
 v1CurrencyRouter.get('/list', currencyHandler.listCurrencies());
 v1CurrencyRouter.get('/convert', currencyHandler.convertCurrency());
+v1CurrencyRouter.post('/scheduler', currencyHandler.ratesScheduler());
 v1Router.post('/user/register', userHandler.createUser);
 v1Router.get('/user/verify', userHandler.verifyUser);
 
 app.use('/v1', v1Router);
 app.use('/v1/currency', v1CurrencyRouter);
 app.use('/v1/currency', v1CurrencyEmailRouter);
-
 
 return app;
 }
