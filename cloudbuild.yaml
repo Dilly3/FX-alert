@@ -1,39 +1,31 @@
 steps:
-   # Clean up Docker system
+  # Clean up Docker system to free memory
   - name: 'gcr.io/cloud-builders/docker'
     args: ['system', 'prune', '-af', '--volumes']
     id: 'cleanup'
 
-  # Remove old images for this project
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args: 
-      - 'container'
-      - 'images'
-      - 'delete'
-      - 'gcr.io/fs-alert-d4f21/fx-alert'
-      - '--force-delete-tags'
-      - '--quiet'
-    id: 'cleanup-old-images'
-    waitFor: ['cleanup']
   # Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: 
       - 'build'
+      - '--no-cache'
       - '-f'
-      - 'Dockerfile.cloud'
+      - 'Dockerfile.dev'
       - '-t'
       - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
       - '.'
     id: 'build-image'
+    waitFor: ['cleanup']
 
   # Push image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA']
     waitFor: ['build-image']
 
-  # Deploy to Cloud Run
-  - name: 'gcr.io/cloud-builders/gcloud'
+  # Deploy to Cloud Run using google/cloud-sdk image
+  - name: 'google/cloud-sdk:alpine'
     args:
+      - 'gcloud'
       - 'run'
       - 'deploy'
       - 'fx-alert'
@@ -62,8 +54,10 @@ steps:
       - '80'
       - '--set-env-vars'
       - 'GOOGLE_CLOUD_PROJECT=fs-alert-d4f21,ENV=${_ENV}'
+
 options:
-  logging: CLOUD_LOGGING_ONLY  # or NONE
+  logging: CLOUD_LOGGING_ONLY
+
 substitutions:
   _ENV: 'prod'
 
