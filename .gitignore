@@ -1,7 +1,6 @@
 node_modules
 .env
 service-account*.json
-/dist
 firestore.indexes.json
 firestore.rules
 firestore.indexes.json
