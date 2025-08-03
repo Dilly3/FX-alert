@@ -7,22 +7,20 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: 
       - 'build'
-      - '--no-cache'
       - '-f'
       - 'Dockerfile.dev'
       - '-t'
-      - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
+      - 'us-west1-docker.pkg.dev/fs-alert-d4f21/fx-alert-repo/fx-alert:$COMMIT_SHA'
       - '.'
     id: 'build-image'
-    waitFor: ['cleanup']
 
-  # Push image to Container Registry
+  # Push image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA']
+    args: ['push', 'us-west1-docker.pkg.dev/fs-alert-d4f21/fx-alert-repo/fx-alert:$COMMIT_SHA']
     waitFor: ['build-image']
 
 options:
   logging: CLOUD_LOGGING_ONLY
 
 images:
-  - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
+  - 'us-west1-docker.pkg.dev/fs-alert-d4f21/fx-alert-repo/fx-alert:$COMMIT_SHA'
