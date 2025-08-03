@@ -11,6 +11,7 @@ tsconfig.json
 *.ts
 !dist/
 Dockerfile.dev
+Dockerfile.cloud
 docker-compose.yml
 variables.tfvars
 cost-optimization-guide.md
