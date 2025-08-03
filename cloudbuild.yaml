@@ -1,0 +1,31 @@
+steps:
+  # Build Docker image (includes TypeScript compilation)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - 'build'
+      - '-t'
+      - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
+      - '.'
+
+  # Push to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'fx-alert-z'
+      - '--image'
+      - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
+      - '--region'
+      - 'us-west1'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'GOOGLE_CLOUD_PROJECT=fs-alert-d4f21'
+      - '--set-env-vars'
+      - 'ENV=prod'
+
+images:
+  - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
