@@ -21,7 +21,7 @@
 
 ## 🏗️ Architecture
 
-![System Architecture](./architech.png)
+![System Architecture](https://storage.googleapis.com/fx-alert-image/Screenshot%202025-08-03%20at%204.00.14%E2%80%AFAM.png)
 
 
 ## 📚 API Documentation
