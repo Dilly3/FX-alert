@@ -10,7 +10,7 @@ steps:
       - 'build'
       - '--no-cache'
       - '-f'
-      - 'Dockerfile.dev'
+      - 'Dockerfile.cloud'
       - '-t'
       - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
       - '.'
@@ -23,7 +23,7 @@ steps:
     waitFor: ['build-image']
 
   # Deploy to Cloud Run using google/cloud-sdk image
-  - name: 'google/cloud-sdk:alpine'
+  - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'gcloud'
       - 'run'
