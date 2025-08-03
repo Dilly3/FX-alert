@@ -1,10 +1,26 @@
 steps:
+   # Clean up Docker system
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['system', 'prune', '-af', '--volumes']
+    id: 'cleanup'
+
+  # Remove old images for this project
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: 
+      - 'container'
+      - 'images'
+      - 'delete'
+      - 'gcr.io/fs-alert-d4f21/fx-alert'
+      - '--force-delete-tags'
+      - '--quiet'
+    id: 'cleanup-old-images'
+    waitFor: ['cleanup']
   # Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: 
       - 'build'
       - '-f'
-      - 'Dockerfile.dev'
+      - 'Dockerfile.cloud'
       - '-t'
       - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
       - '.'
