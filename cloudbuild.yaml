@@ -46,7 +46,8 @@ steps:
       - '80'
       - '--set-env-vars'
       - 'GOOGLE_CLOUD_PROJECT=fs-alert-d4f21,ENV=${_ENV}'
-
+options:
+  logging: CLOUD_LOGGING_ONLY  # or NONE
 substitutions:
   _ENV: 'prod'
 
