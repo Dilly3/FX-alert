@@ -1,9 +1,8 @@
 steps:
-  # Clean up Docker system to free memory
+ # Clean up Docker system to free memory
   - name: 'gcr.io/cloud-builders/docker'
     args: ['system', 'prune', '-af', '--volumes']
     id: 'cleanup'
-
   # Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args: 
@@ -22,44 +21,8 @@ steps:
     args: ['push', 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA']
     waitFor: ['build-image']
 
-  # Deploy to Cloud Run using google/cloud-sdk image
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'gcloud'
-      - 'run'
-      - 'deploy'
-      - 'fx-alert'
-      - '--image'
-      - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
-      - '--region'
-      - 'us-west1'
-      - '--allow-unauthenticated'
-      - '--platform'
-      - 'managed'
-      - '--vpc-connector'
-      - 'projects/fs-alert-d4f21/locations/us-west1/connectors/fx-alert-vpc-connector'
-      - '--vpc-egress'
-      - 'private-ranges-only'
-      - '--memory'
-      - '256Mi'
-      - '--cpu'
-      - '1'
-      - '--timeout'
-      - '300'
-      - '--min-instances'
-      - '0'
-      - '--max-instances'
-      - '2'
-      - '--concurrency'
-      - '80'
-      - '--set-env-vars'
-      - 'GOOGLE_CLOUD_PROJECT=fs-alert-d4f21,ENV=${_ENV}'
-
 options:
   logging: CLOUD_LOGGING_ONLY
-
-substitutions:
-  _ENV: 'prod'
 
 images:
   - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
