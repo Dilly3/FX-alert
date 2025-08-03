@@ -4,7 +4,7 @@ steps:
     args: 
       - 'build'
       - '-f'
-      - 'Dockerfile.cloud'
+      - 'Dockerfile.dev'
       - '-t'
       - 'gcr.io/fs-alert-d4f21/fx-alert:$COMMIT_SHA'
       - '.'
