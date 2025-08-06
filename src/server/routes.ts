@@ -1,63 +1,64 @@
-import { rateLimit } from 'express-rate-limit';
 import { AppState } from "./app";
-import express, { Express } from "express";
+import express, { Express, Router } from "express";
 import { newCurrencyHandler } from "./handlers/currency_handler";
 import { ensureAppReady, RateLimiting, RateLimitingEmail, LogIP } from "./middleware";
 import { healthCheck } from "./handlers/health_handler";
-import { config } from "../secrets/secrets_manager";
 import { newUserHandler } from "./handlers/user_handler";
-import { LiveRatesRequest } from '../model/dtos';
-const cors = require('cors');
+const cors = require ('cors');
 
+export function setupRoutes(appState: AppState): Express {
+ if (!appState) {
+        throw new Error("AppState not initialized");
+    }
+  const app: Express = express();
+  const v1Router = Router();
+  const v1CurrencyRouter = Router();
+  const v1CurrencyEmailRouter = Router();
 
+  // Middleware setup
+  app.set('trust proxy', 1);
+  app.use(express.json());
+  app.use(cors({
+    origin: appState?.secrets?.env === 'prod' ? 'https://your-production-domain.com' : '*',
+    credentials: true
+  }));
+  const commonMiddleware = [
+    LogIP,
+    ensureAppReady(appState),
+    RateLimiting(appState.secrets!)
+  ];
+ const mailerMiddleware = [
+    LogIP,
+    ensureAppReady(appState),
+    RateLimitingEmail(appState.secrets!)
+  ];
 
-export function setupRoutes(appState: AppState, secrets: config) : Express {
-const app: Express = express();
-app.use(express.json());
-// trust the first proxy (GCP API Gateway) 
-app.set('trust proxy', 1);
-app.use(ensureAppReady(appState!));
-//TODO: Update cors origin for prod
-const corsOptions = {
-  origin: secrets!.env === 'prod' ? '*' : '*',
-  credentials: true
-};
+  // Apply common middleware
+  app.use(commonMiddleware);
+  v1Router.use(commonMiddleware);
+  v1CurrencyRouter.use(commonMiddleware);
+  v1CurrencyEmailRouter.use(mailerMiddleware);
 
-const currencyHandler = newCurrencyHandler(appState!.forexApi!, appState!.sendgrid!, appState!.userStore!, appState!.errorLog);
-const userHandler = newUserHandler(appState!.userStore!, appState!.sendgrid!, secrets!);
+  // Initialize handlers
+  const currencyHandler = newCurrencyHandler(appState.forexApi!, appState.sendgrid!, appState.userStore!, appState.errorLog!);
+  const userHandler = newUserHandler(appState.userStore!, appState.sendgrid!, appState.secrets!);
 
-// Middlewares
-app.use(cors(corsOptions));
-app.use(LogIP())
-app.use(RateLimiting(secrets!));
-app.use(ensureAppReady(appState!));
+  // Health check route
+  app.get('/v1/health', healthCheck(appState.dbFirestore!, appState.dbPG!, appState.isAppReady!));
 
+  // Currency routes
+  v1CurrencyEmailRouter.get('/rates', currencyHandler.getLiveRates());
+  v1CurrencyRouter.get('/list', currencyHandler.listCurrencies());
+  v1CurrencyRouter.get('/convert', currencyHandler.convertCurrency());
+  v1CurrencyRouter.post('/scheduler', currencyHandler.ratesScheduler());
 
+  // User routes
+  v1Router.post('/user/register', userHandler.createUser);
+  v1Router.get('/user/verify', userHandler.verifyUser);
 
-app.get('/v1/health', healthCheck(appState!.dbFirestore, appState!.dbPG, appState!.isAppReady));
+  // Apply routers
+  app.use('/v1', v1Router);
+  app.use('/v1/currency', v1CurrencyRouter, v1CurrencyEmailRouter);
 
-const v1Router = express.Router();
-v1Router.use(ensureAppReady(appState!));
-v1Router.use(RateLimiting(secrets!));
-
-const v1CurrencyRouter = express.Router();
-v1CurrencyRouter.use(ensureAppReady(appState!));
-v1CurrencyRouter.use(RateLimiting(secrets!));
-
-const v1CurrencyEmailRouter = express.Router();
-v1CurrencyEmailRouter.use(ensureAppReady(appState!));
-v1CurrencyEmailRouter.use(RateLimitingEmail(secrets!));
-
-v1CurrencyEmailRouter.get('/rates', currencyHandler.getLiveRates());
-v1CurrencyRouter.get('/list', currencyHandler.listCurrencies());
-v1CurrencyRouter.get('/convert', currencyHandler.convertCurrency());
-v1CurrencyRouter.post('/scheduler', currencyHandler.ratesScheduler());
-v1Router.post('/user/register', userHandler.createUser);
-v1Router.get('/user/verify', userHandler.verifyUser);
-
-app.use('/v1', v1Router);
-app.use('/v1/currency', v1CurrencyRouter);
-app.use('/v1/currency', v1CurrencyEmailRouter);
-
-return app;
+  return app;
 }

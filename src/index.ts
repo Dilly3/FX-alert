@@ -8,7 +8,7 @@ Promise.resolve().then(async () => {
   try {
     LogInfo("Starting application initialization...", {});
     
-    const { appState, secrets } = await initializeApplication();
+    const { appState} = await initializeApplication();
     
     // Check if app is ready after initialization
     if (!appState.isAppReady) {
@@ -18,7 +18,7 @@ Promise.resolve().then(async () => {
     
     LogInfo("Application initialized successfully", {});
 
-    const app = setupRoutes(appState, secrets);
+    const app = setupRoutes(appState);
     const port = process.env.PORT || 8080;
     
     app.listen(port, () => {

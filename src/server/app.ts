@@ -12,19 +12,20 @@ import { SendGrid } from "../mailer/sendgrid/sendgrid";
 import { RedisClient } from "../datastore/redis/redis";
 
 export interface AppState {
-  dbFirestore: Firestore;
-  dbPG: DataSource;
-  userStore: UserDataStore;
-  currencyStore: CurrencyDataStore;
-  forexApi: ForexApi;
-errorLog : ErrorLogStore;
-  sendgrid: SendGrid;
-  isAppReady: boolean;
-  redis: RedisClient;
+  dbFirestore?: Firestore;
+  dbPG?: DataSource;
+  userStore?: UserDataStore;
+  currencyStore?: CurrencyDataStore;
+  forexApi?: ForexApi;
+errorLog? : ErrorLogStore;
+  sendgrid?: SendGrid;
+  isAppReady?: boolean;
+  redis?: RedisClient;
+secrets?: config;
 }
 
 
-export async function initializeApplication() : Promise<{appState: AppState, secrets: config}> {
+export async function initializeApplication() : Promise<{appState: AppState}> {
 
   const appState: AppState = {
     dbFirestore: null!,
@@ -35,12 +36,13 @@ export async function initializeApplication() : Promise<{appState: AppState, sec
     sendgrid: null!,
 errorLog : null!,
     isAppReady: false,
-    redis: null!
+    redis: null!,
+secrets:null!
   };
 
   try {
     console.log("Loading secrets...");
-    const secrets = await loadSecrets();
+    appState.secrets = await loadSecrets();
     console.log("Secrets loaded");
 
     console.log("Initializing databases...");
@@ -58,7 +60,7 @@ errorLog : null!,
     } else {
       console.log("Running locally, initializing PostgreSQL...");
       try {
-        appState.dbPG = await initializePgDB(secrets!);
+        appState.dbPG = await initializePgDB(appState!.secrets!);
         console.log("PostgreSQL initialized successfully");
       } catch (error) {
         LogError("PostgreSQL initialization failed:", error);
@@ -68,21 +70,21 @@ errorLog : null!,
 
     LogInfo("Initializing stores...",{});
 
-    appState.userStore = getUserStore(appState.dbPG, appState.dbFirestore);
-    appState.currencyStore = getCurrencyDataStore(appState.dbPG, appState.dbFirestore);
-appState.errorLog = getErrorLogStore(appState.dbPG, appState.dbFirestore)
+    appState.userStore = getUserStore(appState!.dbPG!, appState!.dbFirestore!);
+    appState.currencyStore = getCurrencyDataStore(appState!.dbPG!, appState!.dbFirestore!);
+appState.errorLog = getErrorLogStore(appState!.dbPG!, appState!.dbFirestore!)
     
     // Initialize Redis client first
-    appState.redis = new RedisClient(secrets!.redis_host, secrets!.redis_port, secrets!.redis_password, secrets!.redis_username, secrets!.redis_ttl_hr);
+    appState.redis = new RedisClient(appState.secrets!.redis_host, appState.secrets!.redis_port, appState.secrets!.redis_password, appState.secrets!.redis_username, appState.secrets!.redis_ttl_hr);
     
     // Then initialize ForexApi with Redis client
-    appState.forexApi = new ForexApi(secrets!.forex_api_key, appState.currencyStore!, appState.redis);
-    appState.sendgrid = new SendGrid(secrets!);
+    appState.forexApi = new ForexApi(appState.secrets!.forex_api_key, appState.currencyStore!, appState.redis);
+    appState.sendgrid = new SendGrid(appState.secrets!);
     LogInfo("Stores initialized successfully",{});
 
     appState.isAppReady = true;
     LogInfo("All systems initialized and ready!",{});
-    return {appState, secrets};
+    return {appState};
 
   } catch (error) {
     LogError("app initialization failed:", error);

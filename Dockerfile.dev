@@ -12,7 +12,7 @@ RUN npm install -g redis ioredis @types/redis
 COPY . .
 
 # Expose the port
-EXPOSE 7020
+EXPOSE 8080
 
 ENV GOOGLE_CLOUD_PROJECT=fs-alert-d4f21
 ENV ENV=dev

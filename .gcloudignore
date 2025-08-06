@@ -5,13 +5,13 @@ node_modules/
 *.md
 .env_sample
 !.env_cloud
+!Dockerfile
 
 src/
 tsconfig.json
 *.ts
 !dist/
 Dockerfile.dev
-Dockerfile.cloud
 docker-compose.yml
 variables.tfvars
 cost-optimization-guide.md

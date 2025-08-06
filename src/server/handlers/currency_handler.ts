@@ -110,7 +110,7 @@ export class CurrencyHandler {
     };
   };
 
-  async prefetchRates(
+  private async prefetchRates(
     currencyGroups: Map<string, UserInfo[]>,
     operation: string
   ): Promise<void> {
@@ -215,7 +215,7 @@ export class CurrencyHandler {
   };
 
   // processUser
-  async processUser(
+  private async processUser(
     user: UserInfo
   ): Promise<{ success: boolean; errorMsg?: string }> {
     // Check if user has base and target currencies
