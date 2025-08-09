@@ -1,3 +1,4 @@
+import { Mailer } from "./../../mailer/mailer";
 import { UserDataStore } from "../../datastore/datastore";
 import { CreateUserDto, UserDto, VerifyUserDto } from "../../model/dtos";
 import { Request, Response } from "express";
@@ -9,7 +10,7 @@ import { config } from "../../secrets/secrets_manager";
 export class UserHandler {
   constructor(
     private userStore: UserDataStore,
-    private sendgrid: SendGrid,
+    private mailer: Mailer,
     private secrets: config
   ) {}
 
@@ -44,7 +45,7 @@ export class UserHandler {
         expiryTime: user.pinExpiryTime.toUTCString(),
         baseUrl: this.secrets.base_url,
       };
-      await this.sendgrid.sendPinVerificationEmail(
+      await this.mailer.sendPinVerificationEmail(
         pinVerificationEmailData,
         user.email
       );
@@ -57,13 +58,11 @@ export class UserHandler {
         pinExpiryTime: pinVerificationEmailData.expiryTime,
         isVerified: result.isVerified,
       };
-      res
-        .status(201)
-        .json({
-          message: "User created, check your email for verification",
-          user: userDto,
-          success: true,
-        });
+      res.status(201).json({
+        message: "User created, check your email for verification",
+        user: userDto,
+        success: true,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       LogError("Error creating user:", message);
