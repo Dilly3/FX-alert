@@ -30,8 +30,8 @@ export class UserInfo {
     @Column()
     baseCurrency! : string
 
-    @Column()
-    targetCurrency! : string[]
+    @Column("text", {array: true, default: ["USD","GBP"]})
+    targetCurrency : string[] = ["USD","GBP"]
 
     @Column()
     createdAt! : Date

@@ -1,10 +1,11 @@
 // Load environment variables from .env file
 require('dotenv').config()
 import { config, default_config } from "../../secrets/secrets_manager"
+import { Mailer } from "../mailer"
 import { EmailOptions, LiveRatesResponse, PinVerificationEmailData } from "../models.mailer"
 
 
-export class SendGrid {
+export class SendGrid implements Mailer {
 private sgMail: any
 private ejs: any
 private path: any

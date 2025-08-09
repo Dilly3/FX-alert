@@ -96,7 +96,7 @@ export class PgUserStore implements UserDataStore {
   async verifyUser(email: string): Promise<void> {
     try {
       const updateResult = await this.userRepository.update(
-        { email },
+        { email : email },
         {
           isVerified: true,
           verificationPin: "",
@@ -125,7 +125,7 @@ export class PgUserStore implements UserDataStore {
   async getUser(email: string): Promise<UserInfo | null> {
     try {
       return await this.userRepository.findOne({
-        where: { email },
+        where: { email : email },
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
