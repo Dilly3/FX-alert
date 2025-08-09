@@ -194,3 +194,10 @@ export async function loadSecrets():Promise<config>{
     return await loadENVSecrets()
   }
 }
+
+export enum environment {
+  PRODUCTION = "prod",
+  SANDBOX = "sandbox",
+  DEVELOPMENT = "dev",
+  
+}

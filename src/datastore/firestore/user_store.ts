@@ -173,7 +173,8 @@ export class FirestoreUserStore implements UserDataStore {
 
     async getUser(email: string): Promise<UserInfo | null> {
         try {
-            const snapshot = await this.db.collection(this.COLLECTION_NAME).where('email', '==', email).limit(1).get();
+const trimmedEmail = email.trim();
+            const snapshot = await this.db.collection(this.COLLECTION_NAME).where('email', '==', trimmedEmail).limit(1).get();
 
             if (snapshot.empty) {
                 return null;
