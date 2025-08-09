@@ -1,4 +1,4 @@
-import { loadSecrets } from "../secrets/secrets_manager";
+import { loadSecrets, setAppState } from "../secrets/secrets_manager";
 import { isRunningInGCP } from "../secrets/secrets_manager";
 import { initializeFirestore } from "../datastore/firestore/store";
 import { initializePgDB } from "../datastore/postgres/pg_store";
@@ -6,38 +6,28 @@ import { LogError, LogInfo } from "../logger/gcp_logger";
 import { config } from "../secrets/secrets_manager";
 import { Firestore } from "@google-cloud/firestore";
 import { DataSource } from "typeorm";
-import { CurrencyDataStore, ErrorLogStore,getCurrencyDataStore, UserDataStore, getUserStore, getErrorLogStore } from "../datastore/datastore";
+import {
+  getCurrencyDataStore,
+  getErrorLogStore,
+  getUserStore,
+} from "../datastore/datastore";
+import { RedisClient } from "../datastore/redis/redis";
 import { ForexApi } from "../fx/forex_api/forex_api";
 import { SendGrid } from "../mailer/sendgrid/sendgrid";
-import { RedisClient } from "../datastore/redis/redis";
 
-export interface AppState {
+export interface AppConfig {
   dbFirestore?: Firestore;
   dbPG?: DataSource;
-  userStore?: UserDataStore;
-  currencyStore?: CurrencyDataStore;
-  forexApi?: ForexApi;
-errorLog? : ErrorLogStore;
-  sendgrid?: SendGrid;
-  isAppReady?: boolean;
-  redis?: RedisClient;
-secrets?: config;
+  secrets?: config;
 }
 
-
-export async function initializeApplication() : Promise<{appState: AppState}> {
-
-  const appState: AppState = {
+export async function initializeAppConfig(): Promise<{
+  appState: AppConfig;
+}> {
+  const appState: AppConfig = {
     dbFirestore: null!,
     dbPG: null!,
-    userStore: null!,
-    currencyStore: null!,
-    forexApi: null!,
-    sendgrid: null!,
-errorLog : null!,
-    isAppReady: false,
-    redis: null!,
-secrets:null!
+    secrets: null!,
   };
 
   try {
@@ -47,15 +37,19 @@ secrets:null!
 
     console.log("Initializing databases...");
     const isGCP = isRunningInGCP();
-    
+
     if (isGCP) {
       console.log("Running in GCP, initializing Firestore...");
       try {
-        appState.dbFirestore = await initializeFirestore('fx-alert-db');
+        appState.dbFirestore = await initializeFirestore("fx-alert-db");
         console.log("Firestore initialized successfully");
       } catch (error) {
         LogError("Firestore initialization failed:", error);
-        throw new Error(`Firestore initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(
+          `Firestore initialization failed: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
       }
     } else {
       console.log("Running locally, initializing PostgreSQL...");
@@ -64,33 +58,63 @@ secrets:null!
         console.log("PostgreSQL initialized successfully");
       } catch (error) {
         LogError("PostgreSQL initialization failed:", error);
-        throw new Error(`PostgreSQL initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(
+          `PostgreSQL initialization failed: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
       }
     }
 
-    LogInfo("Initializing stores...",{});
-
-    appState.userStore = getUserStore(appState!.dbPG!, appState!.dbFirestore!);
-    appState.currencyStore = getCurrencyDataStore(appState!.dbPG!, appState!.dbFirestore!);
-appState.errorLog = getErrorLogStore(appState!.dbPG!, appState!.dbFirestore!)
-    
-    // Initialize Redis client first
-    appState.redis = new RedisClient(appState.secrets!.redis_host, appState.secrets!.redis_port, appState.secrets!.redis_password, appState.secrets!.redis_username, appState.secrets!.redis_ttl_hr);
-    
-    // Then initialize ForexApi with Redis client
-    appState.forexApi = new ForexApi(appState.secrets!.forex_api_key, appState.currencyStore!, appState.redis);
-    appState.sendgrid = new SendGrid(appState.secrets!);
-    LogInfo("Stores initialized successfully",{});
-
-    appState.isAppReady = true;
-    LogInfo("All systems initialized and ready!",{});
-    return {appState};
-
+    LogInfo("app config setup successful!!", {});
+    return { appState };
   } catch (error) {
     LogError("app initialization failed:", error);
-    process.exit(1); 
+    throw error;
   }
 }
 
+export function initializeApp(config: AppConfig) {
+  try {
+    const userStore = getUserStore(config!.dbPG!, config!.dbFirestore!);
+    const currencyStore = getCurrencyDataStore(
+      config!.dbPG!,
+      config!.dbFirestore!
+    );
+    const errorLog = getErrorLogStore(config!.dbPG!, config!.dbFirestore!);
 
+    // // Initialize Redis client first
+    const redis = new RedisClient(
+      config!.secrets!.redis_host,
+      config!.secrets!.redis_port,
+      config!.secrets!.redis_password,
+      config!.secrets!.redis_username,
+      config!.secrets!.redis_ttl_hr
+    );
+    // initialize ForexApi with Redis client
+    const forexApi = new ForexApi(
+      config!.secrets!.forex_api_key,
+      currencyStore,
+      redis
+    );
+    const sendgrid = new SendGrid(config!.secrets!);
+    LogInfo("Stores initialized successfully", {});
+    setAppState(true);
+    return {
+      userStore,
+      currencyStore,
+      errorLog,
+      forexApi,
+      sendgrid,
+    };
+  } catch (error) {
+    setAppState(false);
+    LogError("Failed to initialize application:", error);
+    throw new Error(
+      `Failed to initialize application: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
+  }
+}
 

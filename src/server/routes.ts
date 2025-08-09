@@ -1,6 +1,4 @@
-import { AppState } from "./app";
 import express, { Express, Router } from "express";
-import { newCurrencyHandler } from "./handlers/currency_handler";
 import {
   ensureAppReady,
   RateLimiting,
@@ -8,14 +6,14 @@ import {
   LogIP,
 } from "./middleware";
 import { healthCheck } from "./handlers/health_handler";
-import { newUserHandler } from "./handlers/user_handler";
 import { Validator } from "./validator/validator";
+import { AppConfig } from "./app";
 
 const cors = require("cors");
 
-export function setupRoutes(appState: AppState): Express {
-  if (!appState) {
-    throw new Error("AppState not initialized");
+export function setupRoutes(config: AppConfig): Express {
+  if (!config) {
+    throw new Error("AppConfig not initialized");
   }
   const app: Express = express();
   const v1Router = Router();
@@ -28,7 +26,7 @@ export function setupRoutes(appState: AppState): Express {
   app.use(
     cors({
       origin:
-        appState?.secrets?.env === "prod"
+        config?.secrets?.env === "prod"
           ? "https://your-production-domain.com"
           : "*",
       credentials: true,
@@ -36,13 +34,13 @@ export function setupRoutes(appState: AppState): Express {
   );
   const commonMiddleware = [
     LogIP,
-    ensureAppReady(appState),
-    RateLimiting(appState.secrets!),
+    ensureAppReady(),
+    RateLimiting(config.secrets!),
   ];
   const mailerMiddleware = [
     LogIP,
-    ensureAppReady(appState),
-    RateLimitingEmail(appState.secrets!),
+    ensureAppReady(),
+    RateLimitingEmail(config.secrets!),
   ];
 
   // Apply common middleware
@@ -52,54 +50,51 @@ export function setupRoutes(appState: AppState): Express {
   v1CurrencyEmailRouter.use(mailerMiddleware);
 
   // Initialize handlers
-  const currencyHandler = newCurrencyHandler(
-    appState.forexApi!,
-    appState.sendgrid!,
-    appState.userStore!,
-    appState.errorLog!
-  );
-  const userHandler = newUserHandler(
-    appState.userStore!,
-    appState.sendgrid!,
-    appState.secrets!
-  );
+  // const currencyHandler = newCurrencyHandler(
+  //   config.forexApi!,
+  //   config.sendgrid!,
+  //   config.userStore!,
+  //   config.errorLog!
+  // );
+  // const userHandler = newUserHandler(
+  //   appState.userStore!,
+  //   appState.sendgrid!,
+  //   appState.secrets!
+  // );
   const validator = new Validator();
 
   // Health check route
-  app.get(
-    "/v1/health",
-    healthCheck(appState.dbFirestore!, appState.dbPG!, appState.isAppReady!)
-  );
+  app.get("/v1/health", healthCheck(config.dbFirestore!, config.dbPG!));
 
   // Currency routes
-  v1CurrencyEmailRouter.get(
-    "/rates",
-    validator.liveRatesValidator,
-    currencyHandler.getLiveRates()
-  );
-  v1CurrencyRouter.get("/list", currencyHandler.listCurrencies());
-  v1CurrencyRouter.get(
-    "/convert",
-    validator.convertCurrencyValidator,
-    currencyHandler.convertCurrency()
-  );
-  v1CurrencyRouter.post("/scheduler", currencyHandler.ratesScheduler());
+  // v1CurrencyEmailRouter.get(
+  //   "/rates",
+  //   validator.liveRatesValidator,
+  //   currencyHandler.getLiveRates()
+  // );
+  // v1CurrencyRouter.get("/list", currencyHandler.listCurrencies());
+  // v1CurrencyRouter.get(
+  //   "/convert",
+  //   validator.convertCurrencyValidator,
+  //   currencyHandler.convertCurrency()
+  // );
+  // v1CurrencyRouter.post("/scheduler", currencyHandler.ratesScheduler());
 
-  // User routes
-  v1Router.post(
-    "/user/register",
-    validator.RegisterUserValidator,
-    userHandler.createUser
-  );
-  v1Router.get(
-    "/user/verify",
-    validator.verifyUserValidator,
-    userHandler.verifyUser
-  );
+  // // User routes
+  // v1Router.post(
+  //   "/user/register",
+  //   validator.RegisterUserValidator,
+  //   userHandler.createUser
+  // );
+  // v1Router.get(
+  //   "/user/verify",
+  //   validator.verifyUserValidator,
+  //   userHandler.verifyUser
+  // );
 
-  // Apply routers
-  app.use("/v1", v1Router);
-  app.use("/v1/currency", v1CurrencyRouter, v1CurrencyEmailRouter);
+  // // Apply routers
+  // app.use("/v1", v1Router);
+  // app.use("/v1/currency", v1CurrencyRouter, v1CurrencyEmailRouter);
 
   return app;
 }

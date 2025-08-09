@@ -1,7 +1,6 @@
 import { RequestHandler } from 'express';
 import { NextFunction, Request, Response } from "express";
-import { AppState } from "./app";
-import { config } from "../secrets/secrets_manager";
+import { config, getAppState } from "../secrets/secrets_manager";
 import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
 
 export function RateLimiting(secrets: config): RateLimitRequestHandler {
@@ -54,13 +53,12 @@ export function RateLimitingEmail(secrets: config): RateLimitRequestHandler {
   });
 }
 
-
-export function ensureAppReady(appState: AppState): RequestHandler {
+export function ensureAppReady(): RequestHandler {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log(`Middleware check - App ready: ${appState.isAppReady}, Path: ${req.path}, Method: ${req.method}`);
+      console.log(`Middleware check - App ready: ${getAppState()}, Path: ${req.path}, Method: ${req.method}`);
       
-      if (!appState.isAppReady) {
+      if (!getAppState()) {
         console.log('App not ready, returning 503');
         return res.status(503).json({
           message: 'System initializing, try again in 60 secs',
