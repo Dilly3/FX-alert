@@ -2,11 +2,14 @@ import { ForexApi } from "../../fx/forex_api/forex_api";
 import { LogError, LogInfo } from "../../logger/gcp_logger";
 import express, { Request, Response, Express } from "express";
 import { LiveRatesRequest } from "../../model/dtos";
-import { SendGrid } from "../../mailer/sendgrid/sendgrid";
 import { ErrorLogStore, UserDataStore } from "../../datastore/datastore";
 import { ErrorLog, UserInfo } from "../../model/model";
 import { Mailer } from "../../mailer/mailer";
 import { IFXAgent } from "../../fx/fx_agent";
+
+import { getValidationError } from "../validator/validator";
+import { BadRequest } from "../response";
+import { validationResult } from "express-validator/lib/validation-result";
 
 export class CurrencyHandler {
   private readonly RATE_LIMIT_DELAY = 100; // ms between API calls
@@ -43,6 +46,12 @@ export class CurrencyHandler {
       >,
       res: Response
     ) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errString = getValidationError(errors.array())[0].msg;
+        BadRequest(res, errString);
+        return;
+      }
       try {
         const request = req.query;
         const response = await this.fxAgent.convertCurrency(
@@ -77,6 +86,13 @@ export class CurrencyHandler {
       req: Request<{}, {}, {}, LiveRatesRequest>,
       res: Response
     ) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errString = getValidationError(errors.array())[0].msg;
+        BadRequest(res, errString);
+        return;
+      }
+
       try {
         const request = req.query;
         const response = await this.fxAgent.getLiveRates(
@@ -250,12 +266,12 @@ export class CurrencyHandler {
 }
 
 export const newCurrencyHandler = (
-  forexApi: ForexApi,
-  sendgrid: SendGrid,
+  fxAgent: IFXAgent,
+  mailer: Mailer,
   userStore: UserDataStore,
   errorLog: ErrorLogStore
 ) => {
-  return new CurrencyHandler(forexApi, sendgrid, userStore, errorLog);
+  return new CurrencyHandler(fxAgent, mailer, userStore, errorLog);
 };
 
 function uuidv4(): string {

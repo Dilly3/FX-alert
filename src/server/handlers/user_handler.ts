@@ -4,9 +4,11 @@ import { CreateUserDto, UserDto, VerifyUserDto } from "../../model/dtos";
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { LogError } from "../../logger/gcp_logger";
-import { SendGrid } from "../../mailer/sendgrid/sendgrid";
 import { PinVerificationEmailData } from "../../mailer/models.mailer";
 import { config } from "../../secrets/secrets_manager";
+import { validationResult } from "express-validator/lib/validation-result";
+import { getValidationError } from "../validator/validator";
+import { BadRequest } from "../response";
 export class UserHandler {
   constructor(
     private userStore: UserDataStore,
@@ -15,6 +17,12 @@ export class UserHandler {
   ) {}
 
   createUser = async (req: Request<{}, {}, CreateUserDto>, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errString = getValidationError(errors.array())[0].msg;
+      BadRequest(res, errString);
+      return;
+    }
     try {
       // check if user already exists
       const existingUser = await this.userStore.getUser(req.body.email);
@@ -74,6 +82,12 @@ export class UserHandler {
     req: Request<{}, {}, {}, VerifyUserDto>,
     res: Response
   ) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errString = getValidationError(errors.array())[0].msg;
+      BadRequest(res, errString);
+      return;
+    }
     try {
       const user = await this.userStore.getUser(req.query.email as string);
       if (!user) {
@@ -97,8 +111,8 @@ export class UserHandler {
 
 export const newUserHandler = (
   userStore: UserDataStore,
-  sendgrid: SendGrid,
+  mailer: Mailer,
   secrets: config
 ) => {
-  return new UserHandler(userStore, sendgrid, secrets);
+  return new UserHandler(userStore, mailer, secrets);
 };
