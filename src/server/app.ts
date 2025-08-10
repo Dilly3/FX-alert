@@ -22,9 +22,9 @@ export interface AppConfig {
 }
 
 export async function initializeAppConfig(): Promise<{
-  appState: AppConfig;
+  appConfig: AppConfig;
 }> {
-  const appState: AppConfig = {
+  const appConfig: AppConfig = {
     dbFirestore: null!,
     dbPG: null!,
     secrets: null!,
@@ -32,7 +32,7 @@ export async function initializeAppConfig(): Promise<{
 
   try {
     console.log("Loading secrets...");
-    appState.secrets = await loadSecrets();
+    appConfig.secrets = await loadSecrets();
     console.log("Secrets loaded");
 
     console.log("Initializing databases...");
@@ -41,7 +41,7 @@ export async function initializeAppConfig(): Promise<{
     if (isGCP) {
       console.log("Running in GCP, initializing Firestore...");
       try {
-        appState.dbFirestore = await initializeFirestore("fx-alert-db");
+        appConfig.dbFirestore = await initializeFirestore("fx-alert-db");
         console.log("Firestore initialized successfully");
       } catch (error) {
         LogError("Firestore initialization failed:", error);
@@ -54,7 +54,7 @@ export async function initializeAppConfig(): Promise<{
     } else {
       console.log("Running locally, initializing PostgreSQL...");
       try {
-        appState.dbPG = await initializePgDB(appState!.secrets!);
+        appConfig.dbPG = await initializePgDB(appConfig!.secrets!);
         console.log("PostgreSQL initialized successfully");
       } catch (error) {
         LogError("PostgreSQL initialization failed:", error);
@@ -67,7 +67,7 @@ export async function initializeAppConfig(): Promise<{
     }
 
     LogInfo("app config setup successful!!", {});
-    return { appState };
+    return { appConfig };
   } catch (error) {
     LogError("app initialization failed:", error);
     throw error;
@@ -117,4 +117,3 @@ export function initializeApp(config: AppConfig) {
     );
   }
 }
-

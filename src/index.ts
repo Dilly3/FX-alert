@@ -8,10 +8,10 @@ Promise.resolve().then(async () => {
   try {
     LogInfo("Starting application initialization...", {});
 
-    const { appState } = await initializeAppConfig();
+    const { appConfig } = await initializeAppConfig();
     LogInfo("Initializing stores...", {});
     const { userStore, currencyStore, errorLog, forexApi, sendgrid } =
-      initializeApp(appState);
+      initializeApp(appConfig);
     // Check if app is ready after initialization
     if (!getAppState()) {
       LogError("Application failed to initialize properly", {});
@@ -20,7 +20,14 @@ Promise.resolve().then(async () => {
 
     LogInfo("Application initialized successfully", {});
 
-    const app = setupRoutes(appState);
+    const app = setupRoutes(
+      appConfig,
+      userStore,
+      currencyStore,
+      errorLog,
+      forexApi,
+      sendgrid
+    );
     const port = process.env.PORT || 8080;
 
     app.listen(port, () => {
