@@ -17,3 +17,4 @@ cache-[implementation|comparison]*
 firestore-*.md
 redis-[cache|cloud]*
 cloudbuild.yaml
+cloud_build.sh
