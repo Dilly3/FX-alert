@@ -1,5 +1,10 @@
 #! /usr/bin/env bash
 
+
+# build.sh is used to build image of the application
+# and push to container registry in Google Cloud.
+# Google Cloud Project ID is required.
+
 declare GOOGLE_CLOUD_PROJECT
 # Determine project name
 declare PROJECT_NAME
@@ -49,7 +54,7 @@ if [[ $? -ne 0 ]]; then
 fi
 echo "✅✅ Docker build completed successfully"
 echo ""
-echo "IMAGE: $IMAGE"
+echo " 🚨🚨🚨🚨IMAGE: $IMAGE"
 echo ""
 echo "Configuring Docker authentication for Artifact Registry... ⏳"
 echo ""
