@@ -3,7 +3,6 @@ import {
   body,
   query,
 } from "express-validator/lib/middlewares/validation-chain-builders";
-import { UserDataStore } from "../../datastore/datastore";
 import { ValidationChain } from "express-validator/lib/chain/validation-chain";
 
 export interface validationError {
@@ -45,7 +44,6 @@ export class Validator {
         }),
 
       body("targetCurrency")
-        .trim()
         .notEmpty()
         .isArray()
         .withMessage(
@@ -68,15 +66,16 @@ export class Validator {
   verifyUserValidator = (): ValidationChain[] => {
     return [
       query("pin")
-        .trim()
         .notEmpty()
         .isLength({ min: 6, max: 6 })
         .isString()
         .withMessage("Invalid pin"),
+
       query("email").notEmpty().isEmail().withMessage("email invalid"),
     ];
   };
 
+  // Convert currency validator
   convertCurrencyValidator = (): ValidationChain[] => {
     return [
       query("from")
@@ -120,6 +119,7 @@ export class Validator {
     ];
   };
 
+  // Live rates validator
   liveRatesValidator = (): ValidationChain[] => {
     return [
       query("base")
@@ -135,14 +135,13 @@ export class Validator {
         }),
 
       query("currencies")
-        .trim()
         .notEmpty()
-        .isArray()
         .withMessage(
           `target currencies should be an array of one or more currency codes`
         )
-        .custom(async (value: string[]) => {
-          for (const currencyCode of value) {
+        .custom(async (value: string) => {
+          const currencyCodes = value.split(",");
+          for (const currencyCode of currencyCodes) {
             if (typeof currencyCode !== "string" || currencyCode.length !== 3) {
               throw new Error(`currency code ${currencyCode} is invalid`);
             }
@@ -151,6 +150,7 @@ export class Validator {
               throw new Error(`currency ${currencyCode} is not supported`);
             }
           }
+          return true;
         }),
 
       query("email").optional().isEmail().withMessage("email invalid"),
