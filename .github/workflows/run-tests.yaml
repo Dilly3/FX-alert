@@ -8,7 +8,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: dev
+      NODE_ENV: test
       GOOGLE_CLOUD_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
       ENV: test
       SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
