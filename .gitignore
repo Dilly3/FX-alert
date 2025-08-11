@@ -12,6 +12,7 @@ tsconfig.tsbuildinfo
 variables.auto.tfvars
 cost-optimization-guide.md
 monitor-costs.sh
+update.sh
 
 cache-[implementation|comparison]*
 firestore-*.md
