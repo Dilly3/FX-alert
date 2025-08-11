@@ -1,4 +1,9 @@
-import { CurrencyDataStore } from "./../datastore/datastore";
+import {
+  CurrencyDataStore,
+  CurrencyHandlerUserStore,
+  UserHandlerUserStore,
+  ValidatorCurrencyStore,
+} from "./../datastore/datastore";
 import express, { Express, Router } from "express";
 import { healthCheck } from "./handlers/health_handler";
 import { Validator } from "./validator/validator";
@@ -11,18 +16,10 @@ import { getUserRouter } from "./router/user_router";
 
 const cors = require("cors");
 
-export function setupRoutes(
-  appConfig: AppConfig,
-  userStore: UserDataStore,
-  currencyStore: CurrencyDataStore,
-  errorLog: ErrorLogStore,
-  fxAgent: IFXAgent,
-  mailer: Mailer
+export function setupApp(
+  env: string,
+  userStore: CurrencyHandlerUserStore | null
 ): Express {
-  if (!appConfig) {
-    throw new Error("AppConfig not initialized");
-  }
-
   const app: Express = express();
 
   // Middleware setup
@@ -30,39 +27,52 @@ export function setupRoutes(
   app.use(express.json());
   app.use(
     cors({
-      origin:
-        appConfig?.secrets?.env === "prod"
-          ? "https://your-production-domain.com"
-          : "*",
+      origin: env === "prod" ? "https://your-production-domain.com" : "*",
       credentials: true,
     })
   );
 
-  const validator = new Validator(currencyStore);
-
   // Health check route
-  app.get("/v1/health", healthCheck(appConfig.dbFirestore!, appConfig.dbPG!));
+  app.get("/v1/health", healthCheck(userStore));
+  return app;
+}
 
-  // Apply routers
-  const { CurrencyRouter, CurrencyMailerRouter } = getCurrencyRouter(
+// Apply routers
+export function setCurrencyRouter(
+  app: Express,
+  appConfig: AppConfig,
+  validatordb: ValidatorCurrencyStore,
+  fxAgent: IFXAgent,
+  mailer: Mailer,
+  userStore: CurrencyHandlerUserStore,
+  errorlog: ErrorLogStore
+) {
+  const appC = getCurrencyRouter(
+    app,
     appConfig.secrets!,
-    validator,
+    validatordb,
     fxAgent,
     mailer,
     userStore,
-    errorLog
+    errorlog
   );
 
-  const userRouter = getUserRouter(
+  return appC;
+}
+
+export function setUserRouter(
+  app: Express,
+  userStore: UserHandlerUserStore,
+  validatordb: ValidatorCurrencyStore,
+  mailer: Mailer,
+  appconfig: AppConfig
+): Express {
+  const appU = getUserRouter(
+    app,
     userStore,
-    validator,
+    validatordb,
     mailer,
-    appConfig.secrets!
+    appconfig.secrets!
   );
-
-  app.use("/v1/currency", CurrencyRouter);
-  app.use("/v1/currency", CurrencyMailerRouter);
-  app.use("/v1/user", userRouter);
-
-  return app;
+  return appU;
 }

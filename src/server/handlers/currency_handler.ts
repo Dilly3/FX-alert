@@ -1,7 +1,7 @@
 import { LogError, LogInfo } from "../../logger/gcp_logger";
 import express, { Request, Response, Express } from "express";
 import { LiveRatesRequest } from "../../model/dtos";
-import { ErrorLogStore, UserDataStore } from "../../datastore/datastore";
+import { CurrencyHandlerUserStore, ErrorLogStore, UserDataStore } from "../../datastore/datastore";
 import { ErrorLog, UserInfo } from "../../model/model";
 import { Mailer } from "../../mailer/mailer";
 import { IFXAgent } from "../../fx/fx_agent";
@@ -15,7 +15,7 @@ export class CurrencyHandler {
   constructor(
     private fxAgent: IFXAgent,
     private mailer: Mailer,
-    private userStore: UserDataStore,
+    private userStore: CurrencyHandlerUserStore,
     private errorLog: ErrorLogStore
   ) {}
 
@@ -267,7 +267,7 @@ export class CurrencyHandler {
 export const newCurrencyHandler = (
   fxAgent: IFXAgent,
   mailer: Mailer,
-  userStore: UserDataStore,
+  userStore: CurrencyHandlerUserStore,
   errorLog: ErrorLogStore
 ) => {
   return new CurrencyHandler(fxAgent, mailer, userStore, errorLog);

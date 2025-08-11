@@ -1,5 +1,5 @@
 import { Mailer } from "./../../mailer/mailer";
-import { UserDataStore } from "../../datastore/datastore";
+import { UserDataStore, UserHandlerUserStore } from "../../datastore/datastore";
 import { CreateUserDto, UserDto, VerifyUserDto } from "../../model/dtos";
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
@@ -11,7 +11,7 @@ import { getValidationError } from "../validator/validator";
 import { BadRequest } from "../response";
 export class UserHandler {
   constructor(
-    private userStore: UserDataStore,
+    private userStore: UserHandlerUserStore,
     private mailer: Mailer,
     private secrets: config
   ) {}
@@ -110,7 +110,7 @@ export class UserHandler {
 }
 
 export const newUserHandler = (
-  userStore: UserDataStore,
+  userStore: UserHandlerUserStore,
   mailer: Mailer,
   secrets: config
 ) => {

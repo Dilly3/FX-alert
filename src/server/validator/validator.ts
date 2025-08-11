@@ -1,4 +1,7 @@
-import { CurrencyDataStore } from "./../../datastore/datastore";
+import {
+  CurrencyDataStore,
+  ValidatorCurrencyStore,
+} from "./../../datastore/datastore";
 import {
   body,
   query,
@@ -26,7 +29,7 @@ export function getValidationError(errors: any[]): validationError[] {
 }
 
 export class Validator {
-  constructor(private currencydb: CurrencyDataStore) {}
+  constructor(private currencydb: ValidatorCurrencyStore) {}
   RegisterUserValidator = (): ValidationChain[] => {
     return [
       body("email").notEmpty().isEmail().withMessage("invalid email"),
@@ -158,6 +161,6 @@ export class Validator {
   };
 }
 
-export function newValidator(currencydb: CurrencyDataStore): Validator {
+export function newValidator(currencydb: ValidatorCurrencyStore): Validator {
   return new Validator(currencydb);
 }

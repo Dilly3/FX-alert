@@ -6,7 +6,7 @@ node_modules/
 .env_sample
 !.env_cloud
 !Dockerfile
-
+__test__
 src/
 tsconfig.json
 *.ts
@@ -26,3 +26,4 @@ cloudbuild.yaml
 cloud_build.sh
 update.sh
 deploy-copy.sh
+jest.config.js

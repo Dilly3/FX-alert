@@ -1,3 +1,4 @@
+import { UserHandler } from "./../server/handlers/user_handler";
 import { Firestore } from "@google-cloud/firestore";
 import { Currency, UserInfo, ErrorLog } from "../model/model";
 import { FirestoreCurrencyStore } from "./firestore/currency_store";
@@ -37,6 +38,24 @@ export interface UserDataStore {
   validatePin(pin: string, user: UserInfo): boolean;
   groupUsersByCurrency(users: UserInfo[]): Map<string, any[]>;
   generatePin(): string;
+}
+
+export interface CurrencyHandlerUserStore {
+  getUser(email: string): Promise<UserInfo | null>;
+  getVerifiedUsers(): Promise<UserInfo[]>;
+  groupUsersByCurrency(users: UserInfo[]): Map<string, any[]>;
+}
+
+export interface UserHandlerUserStore {
+  getUser(email: string): Promise<UserInfo | null>;
+  saveUser(user: UserInfo): Promise<UserInfo>;
+  validatePin(pin: string, user: UserInfo): boolean;
+  generatePin(): string;
+  verifyUser(email: string): Promise<void>;
+}
+
+export interface ValidatorCurrencyStore {
+getCurrency(code: string): Promise<Currency | null>;
 }
 
 export interface ICache {
