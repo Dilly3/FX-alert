@@ -50,38 +50,6 @@ jobs:
         run: npm ci
       - name: Create service account key file
         run: echo '${{ secrets.SERVICE_ACCOUNT_KEY }}' > service-account-key.json
-      - name: Build project
-        env:
-          NODE_ENV: test
-          GOOGLE_CLOUD_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
-          ENV: dev
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
-          EMAIL_SUBJECT: "Today's Rate"
-          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          GCP_CREDENTIALS: ~/documents/fx-alert-app.json
-          FOREX_API_KEY: ${{ secrets.FOREX_API_KEY }}
-          PORT: 7020
-          DB_HOST: postgres
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: fx_alert_db
-          TZ: Africa/Lagos
-          DATABASE_ID: fx-alert-db
-
-          RATE_LIMIT_WINDOW: 300
-          RATE_LIMIT_MAX: 10
-
-          BASE_URL: https://fx-alert-770622112844.us-west1.run.app
-
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-          REDIS_PORT: 13507
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          REDIS_USERNAME: default
-          REDIS_TTL_HR: 6
-        run: npm run build
 
       - name: Run tests
         run: npm run test
