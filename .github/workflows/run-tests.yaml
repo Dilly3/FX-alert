@@ -7,6 +7,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      ENV: test
 
     steps:
       - uses: actions/checkout@v2
