@@ -6,3 +6,7 @@ type = string
 variable "region" {
 type = string
 }
+
+variable "repository" {
+type = string
+}
