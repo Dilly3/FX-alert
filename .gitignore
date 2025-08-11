@@ -18,3 +18,4 @@ firestore-*.md
 redis-[cache|cloud]*
 cloudbuild.yaml
 cloud_build.sh
+deploy-copy.sh
