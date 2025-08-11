@@ -21,9 +21,7 @@ export interface AppConfig {
   secrets?: config;
 }
 
-export async function initializeAppConfig(): Promise<{
-  appConfig: AppConfig;
-}> {
+export async function initializeAppConfig(): Promise<AppConfig> {
   const appConfig: AppConfig = {
     dbFirestore: null!,
     dbPG: null!,
@@ -67,7 +65,7 @@ export async function initializeAppConfig(): Promise<{
     }
 
     LogInfo("app config setup successful!!", {});
-    return { appConfig };
+    return appConfig;
   } catch (error) {
     LogError("app initialization failed:", error);
     throw error;

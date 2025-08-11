@@ -1,5 +1,6 @@
+import { ValidatorCurrencyStore } from "./../../datastore/datastore";
 import { Currency } from "./../../model/model";
-import { Router } from "express";
+import express, { Express, Router } from "express"
 import {
   ensureAppReady,
   LogIP,
@@ -7,20 +8,25 @@ import {
   RateLimitingEmail,
 } from "../middleware";
 import { config } from "../../secrets/secrets_manager";
-import { ErrorLogStore, UserDataStore } from "../../datastore/datastore";
+import {
+  CurrencyHandlerUserStore,
+  ErrorLogStore,
+  UserDataStore,
+} from "../../datastore/datastore";
 import { Mailer } from "../../mailer/mailer";
 import { IFXAgent } from "../../fx/fx_agent";
 import { newCurrencyHandler } from "../handlers/currency_handler";
-import { Validator } from "../validator/validator";
+import { newValidator, Validator } from "../validator/validator";
 
 export const getCurrencyRouter = (
+  app: Express,
   secrets: config,
-  validator: Validator,
+  validatordb: ValidatorCurrencyStore,
   fxAgent: IFXAgent,
   mailer: Mailer,
-  userStore: UserDataStore,
+  userStore: CurrencyHandlerUserStore,
   errorLog: ErrorLogStore
-): { CurrencyRouter: Router; CurrencyMailerRouter: Router } => {
+): Express => {
   const commonMiddleware = [LogIP, ensureAppReady(), RateLimiting(secrets)];
   const mailerMiddleware = [
     LogIP,
@@ -38,7 +44,7 @@ export const getCurrencyRouter = (
     userStore,
     errorLog
   );
-
+  const validator = newValidator(validatordb);
   CurrencyMailerRouter.get(
     "/rates",
     validator.liveRatesValidator(),
@@ -54,6 +60,7 @@ export const getCurrencyRouter = (
   );
 
   CurrencyRouter.post("/scheduler", currencyHandler.ratesScheduler());
-
-  return { CurrencyRouter, CurrencyMailerRouter };
+  app.use("/v1/currency", CurrencyRouter);
+  app.use("/v1/currency", CurrencyMailerRouter);
+  return app;
 };

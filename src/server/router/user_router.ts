@@ -1,18 +1,25 @@
 import { Router } from "express";
-import { UserDataStore } from "../../datastore/datastore";
+import {
+  UserDataStore,
+  UserHandlerUserStore,
+  ValidatorCurrencyStore,
+} from "../../datastore/datastore";
 import { Mailer } from "../../mailer/mailer";
 import { config } from "../../secrets/secrets_manager";
-import { Validator } from "../validator/validator";
+import { newValidator, Validator } from "../validator/validator";
 import { newUserHandler } from "../handlers/user_handler";
+import express, { Express } from "express";
 
 export function getUserRouter(
-  userStore: UserDataStore,
-  validator: Validator,
+  app: Express,
+  userStore: UserHandlerUserStore,
+  validatordb: ValidatorCurrencyStore,
   mailer: Mailer,
   secrets: config
-): Router {
+): Express {
   const userRouter = Router();
   const userHandler = newUserHandler(userStore, mailer, secrets);
+  const validator = newValidator(validatordb);
   // User routes
   userRouter.post(
     "/register",
@@ -25,5 +32,6 @@ export function getUserRouter(
     userHandler.verifyUser
   );
 
-  return userRouter;
+  app.use("/v1/user", userRouter);
+  return app;
 }

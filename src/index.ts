@@ -1,14 +1,14 @@
 import { LogInfo, LogError } from "./logger/gcp_logger";
 import { getAppState } from "./secrets/secrets_manager";
 import { initializeAppConfig, initializeApp } from "./server/app";
-import { setupRoutes } from "./server/routes";
+import { setCurrencyRouter, setupApp, setUserRouter } from "./server/routes";
 require("dotenv").config();
 
 Promise.resolve().then(async () => {
   try {
     LogInfo("Starting application initialization...", {});
 
-    const { appConfig } = await initializeAppConfig();
+    const appConfig = await initializeAppConfig();
     LogInfo("Initializing stores...", {});
     const { userStore, currencyStore, errorLog, forexApi, sendgrid } =
       initializeApp(appConfig);
@@ -20,13 +20,16 @@ Promise.resolve().then(async () => {
 
     LogInfo("Application initialized successfully", {});
 
-    const app = setupRoutes(
+    let app = setupApp(appConfig.secrets!.env, userStore);
+    app = setUserRouter(app, userStore, currencyStore, sendgrid, appConfig);
+    app = setCurrencyRouter(
+      app,
       appConfig,
-      userStore,
       currencyStore,
-      errorLog,
       forexApi,
-      sendgrid
+      sendgrid,
+      userStore,
+      errorLog
     );
     const port = process.env.PORT || 8080;
 
