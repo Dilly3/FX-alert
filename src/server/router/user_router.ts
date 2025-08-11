@@ -21,7 +21,7 @@ export function getUserRouter(
   );
   userRouter.get(
     "/verify",
-    validator.verifyUserValidator,
+    validator.verifyUserValidator(),
     userHandler.verifyUser
   );
 
