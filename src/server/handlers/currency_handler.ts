@@ -1,16 +1,20 @@
-import { ForexApi } from "../../fx/forex_api/forex_api";
 import { LogError, LogInfo } from "../../logger/gcp_logger";
 import express, { Request, Response, Express } from "express";
 import { LiveRatesRequest } from "../../model/dtos";
-import { SendGrid } from "../../mailer/sendgrid/sendgrid";
 import { ErrorLogStore, UserDataStore } from "../../datastore/datastore";
 import { ErrorLog, UserInfo } from "../../model/model";
+import { Mailer } from "../../mailer/mailer";
+import { IFXAgent } from "../../fx/fx_agent";
+
+import { getValidationError } from "../validator/validator";
+import { BadRequest } from "../response";
+import { validationResult } from "express-validator/lib/validation-result";
 
 export class CurrencyHandler {
   private readonly RATE_LIMIT_DELAY = 100; // ms between API calls
   constructor(
-    private forexApi: ForexApi,
-    private sendgrid: SendGrid,
+    private fxAgent: IFXAgent,
+    private mailer: Mailer,
     private userStore: UserDataStore,
     private errorLog: ErrorLogStore
   ) {}
@@ -18,7 +22,7 @@ export class CurrencyHandler {
   listCurrencies = () => {
     return async (req: Request, res: Response) => {
       try {
-        const currencies = await this.forexApi.getSupportedCurrencies();
+        const currencies = await this.fxAgent.getSupportedCurrencies();
         res.json({ message: "Currencies retrieved", currencies: currencies });
       } catch (error) {
         const message =
@@ -41,15 +45,21 @@ export class CurrencyHandler {
       >,
       res: Response
     ) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errString = getValidationError(errors.array())[0].msg;
+        BadRequest(res, errString);
+        return;
+      }
       try {
         const request = req.query;
-        const response = await this.forexApi.convertCurrency(
+        const response = await this.fxAgent.convertCurrency(
           request.from,
           request.to,
           request.amount,
           request.date
         );
-        const result = this.forexApi.formatCurrency(response.result);
+        const result = this.fxAgent.formatCurrency(response.result);
         res.json({
           message: "Currency converted",
           result: result,
@@ -75,9 +85,16 @@ export class CurrencyHandler {
       req: Request<{}, {}, {}, LiveRatesRequest>,
       res: Response
     ) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        const errString = getValidationError(errors.array())[0].msg;
+        BadRequest(res, errString);
+        return;
+      }
+
       try {
         const request = req.query;
-        const response = await this.forexApi.getLiveRates(
+        const response = await this.fxAgent.getLiveRates(
           request.base,
           request.currencies
         );
@@ -90,7 +107,7 @@ export class CurrencyHandler {
               .json({ message: "Email not verified", success: false });
             return;
           }
-          await this.sendgrid.sendFxRateEmail(response, request.email);
+          await this.mailer.sendFxRateEmail(response, request.email);
           res.json({ message: "Live rates sent to mail", success: true });
         } else {
           res.json({
@@ -126,7 +143,7 @@ export class CurrencyHandler {
         const [baseCurrency, targetCurrencies] = pair.split("_");
         const targets = targetCurrencies.split(",");
 
-        const rates = await this.forexApi.getLiveRates(baseCurrency, targets);
+        const rates = await this.fxAgent.getLiveRates(baseCurrency, targets);
         await this.delay(this.RATE_LIMIT_DELAY);
       } catch (error) {
         LogError(`Failed to fetch rates for ${pair}: ${error}`, operation);
@@ -232,12 +249,12 @@ export class CurrencyHandler {
     // Get live rates for user's currency preferences
     // The getLiveRates method already handles Redis caching
     try {
-      const response = await this.forexApi.getLiveRates(
+      const response = await this.fxAgent.getLiveRates(
         user.baseCurrency,
         user.targetCurrency
       );
       // Send email to user
-      await this.sendgrid.sendFxRateEmail(response, user.email);
+      await this.mailer.sendFxRateEmail(response, user.email);
       return { success: true };
     } catch (error) {
       const errorMessage =
@@ -248,12 +265,12 @@ export class CurrencyHandler {
 }
 
 export const newCurrencyHandler = (
-  forexApi: ForexApi,
-  sendgrid: SendGrid,
+  fxAgent: IFXAgent,
+  mailer: Mailer,
   userStore: UserDataStore,
   errorLog: ErrorLogStore
 ) => {
-  return new CurrencyHandler(forexApi, sendgrid, userStore, errorLog);
+  return new CurrencyHandler(fxAgent, mailer, userStore, errorLog);
 };
 
 function uuidv4(): string {

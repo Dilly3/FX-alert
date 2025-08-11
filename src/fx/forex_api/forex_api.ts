@@ -10,8 +10,9 @@ import { CurrencyDataStore, ICache } from "../../datastore/datastore";
 import axios from "axios";
 import { LogError, LogInfo } from "../../logger/gcp_logger";
 import { environment } from "../../secrets/secrets_manager";
+import { IFXAgent } from "../fx_agent";
 
-export class ForexApi {
+export class ForexApi implements IFXAgent {
   private formatter = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

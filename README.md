@@ -3,13 +3,14 @@
 **FX Alert** is a real-time currency exchange rate monitoring and alert system built with Node.js, TypeScript, and Express. The application provides:
 
 🔸 **Real-time currency conversion** with support for historical rates  
-🔸 **Live multiple currency exchange rate monitoring** 
+🔸 **Live multiple currency exchange rate monitoring**
 🔸 **Email alerts** for verified users with customizable base/target currencies  
 🔸 **RESTful API** with comprehensive currency data and user management  
 🔸 **Multi-database architecture** using PostgreSQL, Firestore, and Redis caching  
-🔸 **Cloud-native deployment** on Google Cloud Platform with Terraform infrastructure  
+🔸 **Cloud-native deployment** on Google Cloud Platform with Terraform infrastructure
 
 **Key Features:**
+
 - Currency conversion with caching for performance
 - User registration with email verification
 - Automated email notifications with formatted rate reports
@@ -21,10 +22,10 @@
 
 ## 🏗️ Architecture
 
-![System Architecture](https://storage.googleapis.com/fx-alert-image/Screenshot%202025-08-03%20at%204.27.19%E2%80%AFAM.png)
-
+![System Architecture](https://storage.googleapis.com/fx-alert-image/Screenshot%202025-08-11%20at%202.48.34%E2%80%AFPM.png)
 
 ## 📚 API Documentation
+
 ## [**Readme.io**](https://fx-alert.readme.io/reference/getting-started#/)
 
 ## 📁 Project Structure
@@ -52,14 +53,13 @@ FX-alert/
 └── deploy.sh              # Deployment script
 ```
 
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 📞 Support
 
-For support, 
+For support,
 email michael.anikamadu@gmail.com or create an issue in this repository.
 
 ## 👨‍💻 Author

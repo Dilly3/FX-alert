@@ -1,1 +1,17 @@
 node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+tests
+test
+coverage
+terraform
+.env.local
+.env.*
+*.md
+*.log
+.vscode
+__pycache__
+

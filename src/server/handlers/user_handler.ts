@@ -1,19 +1,28 @@
+import { Mailer } from "./../../mailer/mailer";
 import { UserDataStore } from "../../datastore/datastore";
 import { CreateUserDto, UserDto, VerifyUserDto } from "../../model/dtos";
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { LogError } from "../../logger/gcp_logger";
-import { SendGrid } from "../../mailer/sendgrid/sendgrid";
 import { PinVerificationEmailData } from "../../mailer/models.mailer";
 import { config } from "../../secrets/secrets_manager";
+import { validationResult } from "express-validator/lib/validation-result";
+import { getValidationError } from "../validator/validator";
+import { BadRequest } from "../response";
 export class UserHandler {
   constructor(
     private userStore: UserDataStore,
-    private sendgrid: SendGrid,
+    private mailer: Mailer,
     private secrets: config
   ) {}
 
   createUser = async (req: Request<{}, {}, CreateUserDto>, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errString = getValidationError(errors.array())[0].msg;
+      BadRequest(res, errString);
+      return;
+    }
     try {
       // check if user already exists
       const existingUser = await this.userStore.getUser(req.body.email);
@@ -44,7 +53,7 @@ export class UserHandler {
         expiryTime: user.pinExpiryTime.toUTCString(),
         baseUrl: this.secrets.base_url,
       };
-      await this.sendgrid.sendPinVerificationEmail(
+      await this.mailer.sendPinVerificationEmail(
         pinVerificationEmailData,
         user.email
       );
@@ -57,13 +66,11 @@ export class UserHandler {
         pinExpiryTime: pinVerificationEmailData.expiryTime,
         isVerified: result.isVerified,
       };
-      res
-        .status(201)
-        .json({
-          message: "User created, check your email for verification",
-          user: userDto,
-          success: true,
-        });
+      res.status(201).json({
+        message: "User created, check your email for verification",
+        user: userDto,
+        success: true,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       LogError("Error creating user:", message);
@@ -75,6 +82,12 @@ export class UserHandler {
     req: Request<{}, {}, {}, VerifyUserDto>,
     res: Response
   ) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errString = getValidationError(errors.array())[0].msg;
+      BadRequest(res, errString);
+      return;
+    }
     try {
       const user = await this.userStore.getUser(req.query.email as string);
       if (!user) {
@@ -98,8 +111,8 @@ export class UserHandler {
 
 export const newUserHandler = (
   userStore: UserDataStore,
-  sendgrid: SendGrid,
+  mailer: Mailer,
   secrets: config
 ) => {
-  return new UserHandler(userStore, sendgrid, secrets);
+  return new UserHandler(userStore, mailer, secrets);
 };

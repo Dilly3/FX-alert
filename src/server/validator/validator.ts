@@ -1,9 +1,8 @@
+import { CurrencyDataStore } from "./../../datastore/datastore";
 import {
   body,
   query,
 } from "express-validator/lib/middlewares/validation-chain-builders";
-import { CurrencyDataStore } from "../../datastore/datastore";
-import { UserDataStore } from "../../datastore/datastore";
 import { ValidationChain } from "express-validator/lib/chain/validation-chain";
 
 export interface validationError {
@@ -27,25 +26,24 @@ export function getValidationError(errors: any[]): validationError[] {
 }
 
 export class Validator {
-  constructor(
-  ) {}
+  constructor(private currencydb: CurrencyDataStore) {}
   RegisterUserValidator = (): ValidationChain[] => {
     return [
-      body("email")
-        .notEmpty()
-        .isEmail().customSanitizer(value => {
-        console.log(`Email after sanitization: ${value}`)
-        return value;
-      }).withMessage("invalid email"),
+      body("email").notEmpty().isEmail().withMessage("invalid email"),
 
       body("baseCurrency")
-        .trim()
         .notEmpty()
         .isLength({ min: 3, max: 3 })
-        .withMessage("invalid currency"),
+        .withMessage("invalid currency")
+        .custom((value) => {
+          const currency = this.currencydb.getCurrency(value);
+          if (!currency) {
+            throw new Error(`currency ${value} is not supported`);
+          }
+          return true;
+        }),
 
       body("targetCurrency")
-        .trim()
         .notEmpty()
         .isArray()
         .withMessage(
@@ -56,6 +54,10 @@ export class Validator {
             if (typeof currencyCode !== "string" || currencyCode.length !== 3) {
               throw new Error(`currency code ${currencyCode} is invalid`);
             }
+            const currency = await this.currencydb.getCurrency(currencyCode);
+            if (!currency) {
+              throw new Error(`currency ${currencyCode} is not supported`);
+            }
           }
         }),
     ];
@@ -64,31 +66,43 @@ export class Validator {
   verifyUserValidator = (): ValidationChain[] => {
     return [
       query("pin")
-        .trim()
         .notEmpty()
         .isLength({ min: 6, max: 6 })
         .isString()
         .withMessage("Invalid pin"),
-      query("email").trim().notEmpty().isEmail().withMessage("email invalid"),
+
+      query("email").notEmpty().isEmail().withMessage("email invalid"),
     ];
   };
 
+  // Convert currency validator
   convertCurrencyValidator = (): ValidationChain[] => {
     return [
       query("from")
-        .trim()
         .notEmpty()
         .isLength({ min: 3, max: 3 })
-        .withMessage("invalid currency"),
-       
+        .withMessage("invalid currency")
+        .custom((value) => {
+          const currency = this.currencydb.getCurrency(value);
+          if (!currency) {
+            throw new Error(`currency ${value} is not supported`);
+          }
+          return true;
+        }),
+
       query("to")
-        .trim()
         .notEmpty()
         .isLength({ min: 3, max: 3 })
-        .withMessage("invalid currency"),
+        .withMessage("invalid currency")
+        .custom((value) => {
+          const currency = this.currencydb.getCurrency(value);
+          if (!currency) {
+            throw new Error(`currency ${value} is not supported`);
+          }
+          return true;
+        }),
 
       query("amount")
-        .trim()
         .notEmpty()
         .isNumeric()
         .withMessage("amount must be a number")
@@ -105,32 +119,45 @@ export class Validator {
     ];
   };
 
+  // Live rates validator
   liveRatesValidator = (): ValidationChain[] => {
     return [
       query("base")
         .notEmpty()
         .isLength({ min: 3, max: 3 })
-        .withMessage("invalid base currency"),
+        .withMessage("invalid base currency")
+        .custom((value) => {
+          const currency = this.currencydb.getCurrency(value);
+          if (!currency) {
+            throw new Error(`currency ${value} is not supported`);
+          }
+          return true;
+        }),
 
       query("currencies")
-        .trim()
         .notEmpty()
-        .isArray()
         .withMessage(
           `target currencies should be an array of one or more currency codes`
         )
-        .custom(async (value: string[]) => {
-          for (const currencyCode of value) {
+        .custom(async (value: string) => {
+          const currencyCodes = value.split(",");
+          for (const currencyCode of currencyCodes) {
             if (typeof currencyCode !== "string" || currencyCode.length !== 3) {
               throw new Error(`currency code ${currencyCode} is invalid`);
             }
+            const currency = await this.currencydb.getCurrency(currencyCode);
+            if (!currency) {
+              throw new Error(`currency ${currencyCode} is not supported`);
+            }
           }
+          return true;
         }),
 
-      query("email")
-        .optional()
-        .isEmail()
-        .withMessage("email invalid"),
+      query("email").optional().isEmail().withMessage("email invalid"),
     ];
   };
+}
+
+export function newValidator(currencydb: CurrencyDataStore): Validator {
+  return new Validator(currencydb);
 }
