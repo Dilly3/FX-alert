@@ -13,7 +13,7 @@ variables.auto.tfvars
 cost-optimization-guide.md
 monitor-costs.sh
 update.sh
-
 cache-[implementation|comparison]*
 firestore-*.md
 redis-[cache|cloud]*
+cloudbuild.yaml
