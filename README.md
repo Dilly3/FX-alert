@@ -26,7 +26,9 @@
 
 ## 📚 API Documentation
 
-<a href="https://fx-alert.readme.io/docs/getting-started#/" target="_blank">**Readme.io**</a>
+[**Readme.io**](https://fx-alert.readme.io/docs/getting-started#/)
+
+<sub>Tip: Right-click the link and Open in new tab</sub>
 
 ## 📁 Project Structure
 
