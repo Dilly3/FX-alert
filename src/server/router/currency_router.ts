@@ -1,6 +1,5 @@
 import { ValidatorCurrencyStore } from "./../../datastore/datastore";
-import { Currency } from "./../../model/model";
-import express, { Express, Router } from "express"
+import express, { Express, Router } from "express";
 import {
   ensureAppReady,
   LogIP,
@@ -11,7 +10,6 @@ import { config } from "../../secrets/secrets_manager";
 import {
   CurrencyHandlerUserStore,
   ErrorLogStore,
-  UserDataStore,
 } from "../../datastore/datastore";
 import { Mailer } from "../../mailer/mailer";
 import { IFXAgent } from "../../fx/fx_agent";
