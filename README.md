@@ -26,9 +26,9 @@
 
 ## 📚 API Documentation
 
-[**Readme.io**](https://fx-alert.readme.io/docs/getting-started#/)
+**_Right-click the link to open in new tab_**
 
-<sub>Tip: Right-click the link and Open in new tab</sub>
+### Link - [**Readme.io**](https://fx-alert.readme.io/docs/getting-started#/)
 
 ## 📁 Project Structure
 
@@ -48,11 +48,15 @@ FX-alert/
 │   ├── firestore/          # Firestore database setup
 │   ├── network/            # VPC and networking
 │   ├── postgres/           # PostgreSQL database setup
-│   └── secrets/            # Secret Manager configuration
+│   ├── secrets/
+    ├── cloud-run/          # Cloud Run service configuration
+    └── artifact-registry/
 ├── Dockerfile              # Production container
 ├── Dockerfile.dev          # Development container
 ├── docker-compose.yml      # Local development setup
-└── deploy.sh              # Deployment script
+├── build.sh/               # Build script
+└── deploy.sh               # Deployment script
+
 ```
 
 ## 📄 License
