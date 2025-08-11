@@ -15,4 +15,5 @@ terraform
 .vscode
 *.sh
 __pycache__
-
+__test__
+jest.config.js
