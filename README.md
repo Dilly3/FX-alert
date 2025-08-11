@@ -26,7 +26,7 @@
 
 ## 📚 API Documentation
 
-## [**Readme.io**](https://fx-alert.readme.io/reference/getting-started#/)
+## [**Readme.io**](https://fx-alert.readme.io/docs/getting-started#/)
 
 ## 📁 Project Structure
 
