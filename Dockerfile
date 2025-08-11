@@ -1,15 +1,14 @@
-FROM node:20-alpine3.21
-
+FROM node:20-alpine
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm ci --omit=dev
 
 COPY . .
 
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]
 
 ENV GOOGLE_CLOUD_PROJECT=fs-alert-d4f21
 ENV ENV=prod
