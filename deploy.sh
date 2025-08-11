@@ -16,9 +16,11 @@ show_help() {
     echo "  -m, --memory MEMORY  Memory limit (128Mi, 256Mi, 512Mi, 1Gi) (will prompt if not provided)"
     echo "  -r, --region REGION  Region (us-west1, us-central1, us-east1) (will prompt if not provided)"
     echo "  -c, --cpu CPU       CPU limit (1, 2, 4) (will prompt if not provided)"
+    echo "  -mxi, --max-instances MAX_INSTANCES  Max instances (1, 2, 3, 4, 5, 6 ...) (will prompt if not provided)"
+
     echo "EXAMPLES:"
-    echo "  $0 -p my-project-ID -e prod -m 512Mi -c 2 -r us-west1   # Set project and env"
-    echo "  $0 -p my-project -e prod -m 512Mi -c 2 -r us-west1   # Set project and env"
+    echo "  $0 -p my-project-ID -e prod -m 512Mi -c 2 -mxi 4 -r us-west1   # Set project and env"
+    echo "  $0 -p my-project -e prod -m 512Mi -c 2 -mxi 4 -r us-west1   # Set project and env"
     echo ""
     echo "ENVIRONMENT VARIABLES:"
     echo "  The script will set these environment variables in Cloud Run:"
@@ -26,6 +28,7 @@ show_help() {
     echo "    ENV                  - Environment (prod/dev/sandbox)"
     echo "    MEMORY               - Memory limit (128Mi, 256Mi, 512Mi, 1Gi)"
     echo "    CPU                  - CPU limit (1, 2, 4)"
+    echo "    MAX_INSTANCES        - Max instances (1, 2, 3,4,5 ..) number "
     echo "    REGION               - Region (us-west1, us-central1, us-east1)"
     echo ""
     echo "REQUIREMENTS:"
@@ -60,6 +63,13 @@ validate_cpu() {
     esac
 }
 
+validate_max_instances() {
+    if ! [[ "$1" =~ ^[0-9]+$ ]]; then
+        echo "Error: Max instances must be a positive integer"
+        exit 1
+    fi
+}
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -82,6 +92,11 @@ while [[ $# -gt 0 ]]; do
         -c|--cpu)
             validate_cpu "$2"
             CPU="$2"
+            shift 2
+            ;;
+        -mxi|--max-instances)
+            validate_max_instances "$2"
+            MAX_INSTANCES="$2"
             shift 2
             ;;
         -r|--region)
@@ -109,6 +124,10 @@ if [ -z "$CPU" ]; then
     read -p "Enter CPU limit (1, 2, 4): " CPU
 fi
 
+if [ -z "$MAX_INSTANCES" ]; then
+    read -p "Enter max instances (1, 2, 3, 4, 5, 6 ...): " MAX_INSTANCES
+fi
+
 if [ -z "$REGION" ]; then
     read -p "Enter region (us-west1, us-central1, us-east1): " REGION
 fi
@@ -121,6 +140,8 @@ fi
 
 validate_memory "$MEMORY"
 validate_cpu "$CPU"
+validate_max_instances "$MAX_INSTANCES"
+
 
 # Determine project name
 declare PROJECT_NAME
@@ -167,7 +188,7 @@ gcloud run deploy $PROJECT_NAME \
   --cpu=${CPU:-1} \
   --timeout=300 \
   --min-instances=0 \
-  --max-instances=2 \
+  --max-instances=${MAX_INSTANCES:-2} \
   --concurrency=80 \
   --set-env-vars GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT \
   --set-env-vars ENV=$ENV
