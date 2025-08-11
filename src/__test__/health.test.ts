@@ -6,7 +6,6 @@ import { setupApp } from "../server/routes";
 import { CurrencyHandlerUserStore } from "../datastore/datastore";
 import { isRunningInGCP } from "../secrets/secrets_manager";
 
-let appconfig: AppConfig | null = null;
 let app: Express;
 
 jest.mock("../secrets/secrets_manager", () => ({
