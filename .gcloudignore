@@ -25,3 +25,4 @@ redis-[cache|cloud]*
 cloudbuild.yaml
 cloud_build.sh
 update.sh
+deploy-copy.sh
