@@ -4,14 +4,22 @@ import { config, getAppState } from "../secrets/secrets_manager";
 import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
 
 export function RateLimiting(secrets: config): RateLimitRequestHandler {
-  if (!secrets) {
-    throw new Error("secrets not initialized");
+  const isTest =
+    process.env.NODE_ENV === "test" ||
+    (secrets ? secrets.env === "test" : false);
+  // Return a pass-through middleware for test environment
+  if (isTest) {
+    return rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: Infinity,
+      handler: (req, res, next) => next(),
+    });
   }
   return rateLimit({
-    windowMs: secrets!.rate_limit_window * 1000,
-    max: secrets!.rate_limit_max,
+    windowMs: secrets ? secrets.rate_limit_window! * 1000 : 60_000,
+    max: secrets ? secrets.rate_limit_max : 10,
     message: `too many requests, try again in ${
-      secrets!.rate_limit_window
+      secrets ? secrets.rate_limit_window : 60
     } secs.`,
     standardHeaders: true,
     legacyHeaders: false,
@@ -22,7 +30,7 @@ export function RateLimiting(secrets: config): RateLimitRequestHandler {
         message: `Rate limit exceeded. Try again in ${
           secrets!.rate_limit_window
         } seconds.`,
-        retryAfter: Math.ceil(secrets!.rate_limit_window),
+        retryAfter: Math.ceil(secrets!.rate_limit_window!),
       });
     },
   });
@@ -33,13 +41,24 @@ export const LogIP: RequestHandler = (req, res, next) => {
   next();
 };
 
-export function RateLimitingEmail(secrets: config): RateLimitRequestHandler {
-  const isDev = process.env.NODE_ENV === "dev" || secrets!.env === "dev";
+export function RateLimitingEmail(secrets: config): RequestHandler {
+  const isTest =
+    process.env.NODE_ENV === "test" ||
+    (secrets ? secrets.env === "test" : false);
+  // Return a pass-through middleware for test environment
+  if (isTest) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      next();
+    };
+  }
+  const isDev =
+    process.env.NODE_ENV === "dev" || (secrets ? secrets.env === "dev" : true);
   const windowMs = isDev ? 60_000 : 12_00_000;
   const maxRequests = isDev ? 10 : 7;
   const retryAfterSeconds = Math.ceil(windowMs / 1000);
   const errorMessage = `Email rate limit exceeded. Try again in ${retryAfterSeconds} seconds.`;
 
+  // Use rateLimit for non-test environments
   return rateLimit({
     windowMs,
     max: maxRequests,
