@@ -83,15 +83,15 @@ export function initializeApp(config: AppConfig) {
 
     // // Initialize Redis client first
     const redis = new RedisClient(
-      config!.secrets!.redis_host,
-      config!.secrets!.redis_port,
-      config!.secrets!.redis_password,
-      config!.secrets!.redis_username,
-      config!.secrets!.redis_ttl_hr
+      config!.secrets!.redis_host!,
+      config!.secrets!.redis_port!,
+      config!.secrets!.redis_password!,
+      config!.secrets!.redis_username!,
+      config!.secrets!.redis_ttl_hr!
     );
     // initialize ForexApi with Redis client
     const forexApi = new ForexApi(
-      config!.secrets!.forex_api_key,
+      config!.secrets!.forex_api_key!,
       currencyStore,
       redis
     );

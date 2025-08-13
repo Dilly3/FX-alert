@@ -51,7 +51,7 @@ export class UserHandler {
         pin: user.verificationPin,
         email: user.email,
         expiryTime: user.pinExpiryTime.toUTCString(),
-        baseUrl: this.secrets.base_url,
+        baseUrl: this.secrets.base_url!,
       };
       await this.mailer.sendPinVerificationEmail(
         pinVerificationEmailData,

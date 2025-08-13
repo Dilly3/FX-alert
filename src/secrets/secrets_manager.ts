@@ -10,27 +10,27 @@ export function setAppState(ready: boolean) {
 
 export type config = {
   env: string;
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-  database: string;
-  ssl: boolean;
-  projectId: string;
-  sendgrid_api_key: string;
-  sendgrid_sender_email: string;
-  sendgrid_email_subject: string;
-  firebase_storage_bucket: string;
-  firestore_database_id: string;
-  forex_api_key: string;
-  rate_limit_max: number;
-  rate_limit_window: number;
-  base_url: string;
-  redis_host: string;
-  redis_port: number;
-  redis_password: string;
-  redis_username: string;
-  redis_ttl_hr: number;
+  host?: string;
+  port?: number;
+  username?: string;
+  password?: string;
+  database?: string;
+  ssl?: boolean;
+  projectId?: string;
+  sendgrid_api_key?: string;
+  sendgrid_sender_email?: string;
+  sendgrid_email_subject?: string;
+  firebase_storage_bucket?: string;
+  firestore_database_id?: string;
+  forex_api_key?: string;
+  rate_limit_max?: number;
+  rate_limit_window?: number;
+  base_url?: string;
+  redis_host?: string;
+  redis_port?: number;
+  redis_password?: string;
+  redis_username?: string;
+  redis_ttl_hr?: number;
 };
 
 async function getSecret(secretName: string): Promise<string> {
