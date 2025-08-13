@@ -92,7 +92,7 @@ export class ForexApi implements IFXAgent {
     date?: string
   ): Promise<ConvertCurrencyResponse> {
     // Check Redis cache first
-    let req: ConvertCurrencyRequest = {
+    const req: ConvertCurrencyRequest = {
       from: from,
       to: to,
       amount: amount.toString(),
@@ -147,7 +147,7 @@ export class ForexApi implements IFXAgent {
       ? currencies
       : [currencies];
 
-    let req: LiveRatesRequest = {
+    const req: LiveRatesRequest = {
       base: base,
       currencies: currenciesArray,
     };

@@ -1,12 +1,3 @@
-type UserCreateDto = {
-    email: string
-    firstName: string 
-    lastName: string
-    fromCurrency: string
-    toCurrency: string
-    preferences: string
-}
-
 interface CurrencyResponse {
   success: boolean;
   symbols: Record<string, string>;
@@ -27,10 +18,10 @@ interface ConvertCurrencyResponse {
 }
 
 interface ConvertCurrencyRequest {
-from : string;
-to : string;
-amount: string;
-date?: string;
+  from: string;
+  to: string;
+  amount: string;
+  date?: string;
 }
 interface LiveRatesRequest {
   base: string;
@@ -62,13 +53,19 @@ interface VerifyUserDto {
 }
 
 type CreateUserDto = {
-    email: string
-    baseCurrency: string
-    targetCurrency: string | string[]
-}
+  email: string;
+  baseCurrency: string;
+  targetCurrency: string | string[];
+};
 
-
-
-
-export {CurrencyResponse, ConvertCurrencyResponse, ConvertCurrencyRequest,LiveRatesResponse, VerifyUserDto, CreateUserDto, LiveRatesRequest, UserDto, CreateUserResponse}
-
+export {
+  CurrencyResponse,
+  ConvertCurrencyResponse,
+  ConvertCurrencyRequest,
+  LiveRatesResponse,
+  VerifyUserDto,
+  CreateUserDto,
+  LiveRatesRequest,
+  UserDto,
+  CreateUserResponse,
+};

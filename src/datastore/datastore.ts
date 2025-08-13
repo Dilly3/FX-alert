@@ -1,4 +1,3 @@
-import { UserHandler } from "./../server/handlers/user_handler";
 import { Firestore } from "@google-cloud/firestore";
 import { Currency, UserInfo, ErrorLog } from "../model/model";
 import { FirestoreCurrencyStore } from "./firestore/currency_store";
@@ -55,7 +54,7 @@ export interface UserHandlerUserStore {
 }
 
 export interface ValidatorCurrencyStore {
-getCurrency(code: string): Promise<Currency | null>;
+  getCurrency(code: string): Promise<Currency | null>;
 }
 
 export interface ICache {
@@ -90,7 +89,7 @@ export function getCurrencyDataStore(
     return currencyDataStore;
   }
   if (isGCP) {
-    if (!dbFirestore) {
+    if (dbFirestore == null) {
       throw new Error("Firestore connection not available for GCP environment");
     }
     currencyDataStore = new FirestoreCurrencyStore(dbFirestore);

@@ -2,13 +2,13 @@ import { Response } from "express";
 
 export interface apiResponse {
   message: string;
-  data: any;
+  data: object | string | number | boolean | null;
   status: number;
 }
 
 export interface apiError {
   message: string;
-  error: any;
+  error: Error | string;
   status: number;
 }
 

@@ -1,7 +1,4 @@
-import {
-  CurrencyDataStore,
-  ValidatorCurrencyStore,
-} from "./../../datastore/datastore";
+import { ValidatorCurrencyStore } from "./../../datastore/datastore";
 import {
   body,
   query,
@@ -16,18 +13,6 @@ export interface validationError {
   type: string;
 }
 
-export function getValidationError(errors: any[]): validationError[] {
-  return errors.map((e: any) => {
-    return {
-      location: e.location,
-      msg: e.msg,
-      path: e.path,
-      value: e.value,
-      type: e.type,
-    };
-  });
-}
-
 export class Validator {
   constructor(private currencydb: ValidatorCurrencyStore) {}
   RegisterUserValidator = (): ValidationChain[] => {
@@ -38,12 +23,11 @@ export class Validator {
         .notEmpty()
         .isLength({ min: 3, max: 3 })
         .withMessage("invalid currency")
-        .custom((value) => {
-          const currency = this.currencydb.getCurrency(value);
-          if (!currency) {
+        .custom(async (value) => {
+          const currency = await this.currencydb.getCurrency(value);
+          if (currency == null) {
             throw new Error(`currency ${value} is not supported`);
           }
-          return true;
         }),
 
       body("targetCurrency")
@@ -85,24 +69,22 @@ export class Validator {
         .notEmpty()
         .isLength({ min: 3, max: 3 })
         .withMessage("invalid currency")
-        .custom((value) => {
-          const currency = this.currencydb.getCurrency(value);
-          if (!currency) {
+        .custom(async (value) => {
+          const currency = await this.currencydb.getCurrency(value);
+          if (currency == null) {
             throw new Error(`currency ${value} is not supported`);
           }
-          return true;
         }),
 
       query("to")
         .notEmpty()
         .isLength({ min: 3, max: 3 })
         .withMessage("invalid currency")
-        .custom((value) => {
-          const currency = this.currencydb.getCurrency(value);
-          if (!currency) {
+        .custom(async (value) => {
+          const currency = await this.currencydb.getCurrency(value);
+          if (currency == null) {
             throw new Error(`currency ${value} is not supported`);
           }
-          return true;
         }),
 
       query("amount")
@@ -113,7 +95,6 @@ export class Validator {
           if (parseFloat(value.toString()) <= 0) {
             throw new Error("amount must be greater than zero");
           }
-          return true;
         }),
       query("date")
         .optional()
@@ -129,12 +110,11 @@ export class Validator {
         .notEmpty()
         .isLength({ min: 3, max: 3 })
         .withMessage("invalid base currency")
-        .custom((value) => {
-          const currency = this.currencydb.getCurrency(value);
-          if (!currency) {
+        .custom(async (value) => {
+          const currency = await this.currencydb.getCurrency(value);
+          if (currency == null) {
             throw new Error(`currency ${value} is not supported`);
           }
-          return true;
         }),
 
       query("currencies")
@@ -153,7 +133,6 @@ export class Validator {
               throw new Error(`currency ${currencyCode} is not supported`);
             }
           }
-          return true;
         }),
 
       query("email").optional().isEmail().withMessage("email invalid"),
