@@ -89,7 +89,7 @@ export function getCurrencyDataStore(
     return currencyDataStore;
   }
   if (isGCP) {
-    if (!dbFirestore) {
+    if (dbFirestore == null) {
       throw new Error("Firestore connection not available for GCP environment");
     }
     currencyDataStore = new FirestoreCurrencyStore(dbFirestore);

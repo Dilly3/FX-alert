@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import * as serviceAccount from "../../../service-account-key.json";
+//import * as serviceAccount from "../../../service-account-key.json";
 import { Firestore } from "@google-cloud/firestore";
 import { default_config } from "../../secrets/secrets_manager";
 import { getApps } from "firebase-admin/app";
@@ -18,9 +18,9 @@ export async function initializeFirestore(
     if (!getApps().length) {
       console.log("Initializing Firebase Admin App...");
       admin.initializeApp({
-        credential: admin.credential.cert(
-          serviceAccount as admin.ServiceAccount
-        ),
+        // credential: admin.credential.cert(
+        //   serviceAccount as admin.ServiceAccount
+        // ),
         projectId: default_config!.projectId,
         storageBucket: default_config!.firebase_storage_bucket,
       });
