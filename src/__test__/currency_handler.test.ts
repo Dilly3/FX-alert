@@ -17,6 +17,18 @@ jest.mock("../server/app", () => ({
   initializeAppConfig: jest.fn(),
 }));
 
+jest.mock("../../../service-account-key.json", () => ({
+  type: "service_account",
+  project_id: "test-project",
+  private_key_id: "test-key-id",
+  private_key:
+    "-----BEGIN PRIVATE KEY-----\ntest-private-key\n-----END PRIVATE KEY-----\n",
+  client_email: "test@test-project.iam.gserviceaccount.com",
+  client_id: "test-client-id",
+  auth_uri: "https://accounts.google.com/o/oauth2/auth",
+  token_uri: "https://oauth2.googleapis.com/token",
+}));
+
 let appConfig: AppConfig = {
   dbFirestore: null!,
   dbPG: null!,
