@@ -21,7 +21,7 @@ export async function initializeFirestore(
         credential: admin.credential.cert(
           serviceAccount as admin.ServiceAccount
         ),
-        projectId: default_config!.projectId || serviceAccount.project_id,
+        projectId: default_config!.projectId,
         storageBucket: default_config!.firebase_storage_bucket,
       });
       console.log("Firebase Admin App initialized");
