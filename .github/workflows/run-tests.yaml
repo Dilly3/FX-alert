@@ -27,3 +27,4 @@ jobs:
         run: npm run test
         env:
           NODE_ENV: test
+          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
