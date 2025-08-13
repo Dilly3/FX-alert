@@ -1,8 +1,3 @@
-import {
-  CurrencyHandlerUserStore,
-  UserHandlerUserStore,
-} from "../../datastore/datastore";
-
 export function GetMockCurrencyHandlerUserStore() {
   return {
     getUser: jest.fn(),
@@ -20,5 +15,3 @@ export function GetMockUserHandlerUserStore() {
     verifyUser: jest.fn(),
   };
 }
-
-

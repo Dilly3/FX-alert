@@ -6,7 +6,7 @@ import rateLimit, { RateLimitRequestHandler } from "express-rate-limit";
 export function RateLimiting(secrets: config): RateLimitRequestHandler {
   const isTest =
     process.env.NODE_ENV === "test" ||
-    (secrets ? secrets.env === "test" : false);
+    (secrets != null ? secrets.env === "test" : false);
   // Return a pass-through middleware for test environment
   if (isTest) {
     return rateLimit({
@@ -16,10 +16,10 @@ export function RateLimiting(secrets: config): RateLimitRequestHandler {
     });
   }
   return rateLimit({
-    windowMs: secrets ? secrets.rate_limit_window! * 1000 : 60_000,
-    max: secrets ? secrets.rate_limit_max : 10,
+    windowMs: secrets != null ? secrets.rate_limit_window! * 1000 : 60_000,
+    max: secrets != null ? secrets.rate_limit_max : 10,
     message: `too many requests, try again in ${
-      secrets ? secrets.rate_limit_window : 60
+      secrets != null ? secrets.rate_limit_window : 60
     } secs.`,
     standardHeaders: true,
     legacyHeaders: false,
@@ -44,7 +44,7 @@ export const LogIP: RequestHandler = (req, res, next) => {
 export function RateLimitingEmail(secrets: config): RequestHandler {
   const isTest =
     process.env.NODE_ENV === "test" ||
-    (secrets ? secrets.env === "test" : false);
+    (secrets != null ? secrets.env === "test" : false);
   // Return a pass-through middleware for test environment
   if (isTest) {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -52,7 +52,8 @@ export function RateLimitingEmail(secrets: config): RequestHandler {
     };
   }
   const isDev =
-    process.env.NODE_ENV === "dev" || (secrets ? secrets.env === "dev" : true);
+    process.env.NODE_ENV === "dev" ||
+    (secrets != null ? secrets.env === "dev" : true);
   const windowMs = isDev ? 60_000 : 12_00_000;
   const maxRequests = isDev ? 10 : 7;
   const retryAfterSeconds = Math.ceil(windowMs / 1000);

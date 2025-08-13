@@ -41,7 +41,7 @@ async function getSecret(secretName: string): Promise<string> {
     dotenv.config({ path: "../../.env_cloud" });
     const projectId = process.env.GOOGLE_CLOUD_PROJECT;
 
-    if (!projectId) {
+    if (projectId == null || projectId === "") {
       throw new Error("GOOGLE_CLOUD_PROJECT environment variable is not set");
     }
 
@@ -50,7 +50,7 @@ async function getSecret(secretName: string): Promise<string> {
     });
 
     const secretValue = version.payload?.data?.toString();
-    if (!secretValue) {
+    if (secretValue == null || secretValue === "") {
       throw new Error(`Secret '${secretName}' is empty or not found`);
     }
 
