@@ -1,5 +1,5 @@
 import { ValidatorCurrencyStore } from "./../../datastore/datastore";
-import express, { Express, Router } from "express";
+import { Express, Router } from "express";
 import {
   ensureAppReady,
   LogIP,
@@ -14,7 +14,7 @@ import {
 import { Mailer } from "../../mailer/mailer";
 import { IFXAgent } from "../../fx/fx_agent";
 import { newCurrencyHandler } from "../handlers/currency_handler";
-import { newValidator, Validator } from "../validator/validator";
+import { newValidator } from "../validator/validator";
 
 export const getCurrencyRouter = (
   app: Express,

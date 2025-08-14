@@ -5,9 +5,9 @@ import {
 } from "../../datastore/datastore";
 import { Mailer } from "../../mailer/mailer";
 import { config } from "../../secrets/secrets_manager";
-import { newValidator, Validator } from "../validator/validator";
+import { newValidator} from "../validator/validator";
 import { newUserHandler } from "../handlers/user_handler";
-import express, { Express } from "express";
+import { Express } from "express";
 
 export function getUserRouter(
   app: Express,

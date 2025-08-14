@@ -1,20 +1,18 @@
 import {
-  CurrencyDataStore,
   CurrencyHandlerUserStore,
   UserHandlerUserStore,
   ValidatorCurrencyStore,
 } from "./../datastore/datastore";
-import express, { Express, Router } from "express";
+import express, { Express } from "express";
 import { healthCheck } from "./handlers/health_handler";
-import { Validator } from "./validator/validator";
 import { AppConfig } from "./app";
-import { ErrorLogStore, UserDataStore } from "../datastore/datastore";
+import { ErrorLogStore } from "../datastore/datastore";
 import { Mailer } from "../mailer/mailer";
 import { IFXAgent } from "../fx/fx_agent";
 import { getCurrencyRouter } from "./router/currency_router";
 import { getUserRouter } from "./router/user_router";
 
-const cors = require("cors");
+import cors from "cors";
 
 export function setupApp(
   env: string,

@@ -1,7 +1,8 @@
 node_modules
 .env
 /dist
-service-account*.json
+service-account-key.json
+service-account2-key.json
 firestore.indexes.json
 firestore.rules
 firestore.indexes.json

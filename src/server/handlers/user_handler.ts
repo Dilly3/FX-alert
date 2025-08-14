@@ -1,5 +1,5 @@
 import { Mailer } from "./../../mailer/mailer";
-import { UserDataStore, UserHandlerUserStore } from "../../datastore/datastore";
+import { UserHandlerUserStore } from "../../datastore/datastore";
 import { CreateUserDto, UserDto, VerifyUserDto } from "../../model/dtos";
 import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
@@ -7,7 +7,6 @@ import { LogError } from "../../logger/gcp_logger";
 import { PinVerificationEmailData } from "../../mailer/models.mailer";
 import { config } from "../../secrets/secrets_manager";
 import { validationResult } from "express-validator/lib/validation-result";
-import { getValidationError } from "../validator/validator";
 import { BadRequest } from "../response";
 export class UserHandler {
   constructor(
@@ -19,7 +18,7 @@ export class UserHandler {
   createUser = async (req: Request<{}, {}, CreateUserDto>, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const errString = getValidationError(errors.array())[0].msg;
+      const errString = errors.array()[0].msg;
       BadRequest(res, errString);
       return;
     }
@@ -79,12 +78,12 @@ export class UserHandler {
   };
 
   verifyUser = async (
-    req: Request<{}, {}, {}, VerifyUserDto>,
+    req: Request<object, object, object, VerifyUserDto>,
     res: Response
   ) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const errString = getValidationError(errors.array())[0].msg;
+      const errString = errors.array()[0].msg;
       BadRequest(res, errString);
       return;
     }

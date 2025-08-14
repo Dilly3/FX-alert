@@ -1,4 +1,4 @@
-import express, { Express } from "express";
+import { Express } from "express";
 import { setAppState } from "../secrets/secrets_manager";
 import { AppConfig, initializeAppConfig } from "../server/app";
 import { httpBadRequest, httpOK } from "../server/response";
@@ -15,6 +15,11 @@ jest.mock("../server/app", () => ({
   ...jest.requireActual("../server/app"),
   initializeApp: jest.fn(),
   initializeAppConfig: jest.fn(),
+}));
+
+jest.mock("../datastore/datastore", () => ({
+  ...jest.requireActual("../datastore/datastore"),
+  initializeDatabases: jest.fn(),
 }));
 
 let appConfig: AppConfig = {
