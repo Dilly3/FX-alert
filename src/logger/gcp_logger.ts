@@ -1,5 +1,5 @@
 // Imports the Google Cloud client library
-const { Logging } = require("@google-cloud/logging");
+import { Logging } from "@google-cloud/logging";
 
 // Log severity constants
 export const LOG_SEVERITY = {
