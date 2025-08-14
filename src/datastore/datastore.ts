@@ -1,4 +1,3 @@
-import { UserHandler } from "./../server/handlers/user_handler";
 import { Firestore } from "@google-cloud/firestore";
 import { Currency, UserInfo, ErrorLog } from "../model/model";
 import { FirestoreCurrencyStore } from "./firestore/currency_store";

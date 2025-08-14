@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import * as serviceAccount from "../../../service-account-key.json";
 import { Firestore } from "@google-cloud/firestore";
 import { default_config } from "../../secrets/secrets_manager";
-import { initializeApp, getApps } from "firebase-admin/app";
+import { getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
 let db: Firestore | null = null;

@@ -1,5 +1,4 @@
-import express, { Express } from "express";
-import { AppConfig, initializeAppConfig } from "../server/app";
+import { Express } from "express";
 import { httpOK } from "../server/response";
 import request from "supertest";
 import { setupApp } from "../server/routes";

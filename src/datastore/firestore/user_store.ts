@@ -1,5 +1,5 @@
-import { Firestore, QueryDocumentSnapshot } from "@google-cloud/firestore";
-import { UserInfo, collection, ErrorLog } from "../../model/model";
+import { Firestore } from "@google-cloud/firestore";
+import { UserInfo, collection} from "../../model/model";
 import { UserDataStore } from "../datastore";
 
 
