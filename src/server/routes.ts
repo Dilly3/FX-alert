@@ -12,7 +12,7 @@ import { IFXAgent } from "../fx/fx_agent";
 import { getCurrencyRouter } from "./router/currency_router";
 import { getUserRouter } from "./router/user_router";
 
-import cors from "cors";
+const cors = require("cors");
 
 export function setupApp(
   env: string,
