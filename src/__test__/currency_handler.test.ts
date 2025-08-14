@@ -10,11 +10,17 @@ import { MockFxAgent } from "./__mocks__/fx.mocks";
 import { MockMailer } from "./__mocks__/mailer.mocks";
 import { GetMockCurrencyHandlerUserStore } from "./__mocks__/user_store.mocks";
 import { GetMockErrorLogStore } from "./__mocks__/error_log.mocks";
+import { initializeDatabases } from "../datastore/datastore";
 
 jest.mock("../server/app", () => ({
   ...jest.requireActual("../server/app"),
   initializeApp: jest.fn(),
   initializeAppConfig: jest.fn(),
+}));
+
+jest.mock("../datastore/datastore", () => ({
+  ...jest.requireActual("../datastore/datastore"),
+  initializeDatabases: jest.fn(),
 }));
 
 let appConfig: AppConfig = {
@@ -61,6 +67,10 @@ describe("GET /v1/currency/convert", () => {
 
     // Setup mocks
     (initializeAppConfig as jest.Mock).mockResolvedValue(appConfig);
+    (initializeDatabases as jest.Mock).mockResolvedValue({
+      dbFirestore: {},
+      dbPG: {},
+    });
 
     // Setup app
     app = setupApp("test", currencyUserStore);
