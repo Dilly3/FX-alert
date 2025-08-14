@@ -1,4 +1,4 @@
-import express, { Express } from "express";
+import { Express } from "express";
 import { setAppState } from "../secrets/secrets_manager";
 import { AppConfig, initializeAppConfig } from "../server/app";
 import { httpBadRequest, httpOK } from "../server/response";
@@ -10,7 +10,6 @@ import { MockFxAgent } from "./__mocks__/fx.mocks";
 import { MockMailer } from "./__mocks__/mailer.mocks";
 import { GetMockCurrencyHandlerUserStore } from "./__mocks__/user_store.mocks";
 import { GetMockErrorLogStore } from "./__mocks__/error_log.mocks";
-import { initializeDatabases } from "../datastore/datastore";
 
 jest.mock("../server/app", () => ({
   ...jest.requireActual("../server/app"),

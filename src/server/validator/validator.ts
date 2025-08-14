@@ -1,5 +1,4 @@
 import {
-  CurrencyDataStore,
   ValidatorCurrencyStore,
 } from "./../../datastore/datastore";
 import {
@@ -16,17 +15,6 @@ export interface validationError {
   type: string;
 }
 
-export function getValidationError(errors: any[]): validationError[] {
-  return errors.map((e: any) => {
-    return {
-      location: e.location,
-      msg: e.msg,
-      path: e.path,
-      value: e.value,
-      type: e.type,
-    };
-  });
-}
 
 export class Validator {
   constructor(private currencydb: ValidatorCurrencyStore) {}

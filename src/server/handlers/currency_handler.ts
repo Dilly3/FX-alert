@@ -1,16 +1,14 @@
 import { LogError, LogInfo } from "../../logger/gcp_logger";
-import express, { Request, Response, Express } from "express";
+import { Request, Response } from "express";
 import { LiveRatesRequest } from "../../model/dtos";
 import {
   CurrencyHandlerUserStore,
   ErrorLogStore,
-  UserDataStore,
 } from "../../datastore/datastore";
 import { ErrorLog, UserInfo } from "../../model/model";
 import { Mailer } from "../../mailer/mailer";
 import { IFXAgent } from "../../fx/fx_agent";
 
-import { getValidationError } from "../validator/validator";
 import { BadRequest } from "../response";
 import { validationResult } from "express-validator/lib/validation-result";
 
@@ -51,7 +49,7 @@ export class CurrencyHandler {
     ) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const errString = getValidationError(errors.array())[0].msg;
+        const errString = errors.array()[0].msg;
         console.log(errString);
         BadRequest(res, errString);
         return;
@@ -92,7 +90,7 @@ export class CurrencyHandler {
     ) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        const errString = getValidationError(errors.array())[0].msg;
+        const errString = errors.array()[0].msg;
         BadRequest(res, errString);
         return;
       }
