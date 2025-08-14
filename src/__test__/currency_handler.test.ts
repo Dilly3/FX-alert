@@ -67,10 +67,6 @@ describe("GET /v1/currency/convert", () => {
 
     // Setup mocks
     (initializeAppConfig as jest.Mock).mockResolvedValue(appConfig);
-    (initializeDatabases as jest.Mock).mockResolvedValue({
-      dbFirestore: {},
-      dbPG: {},
-    });
 
     // Setup app
     app = setupApp("test", currencyUserStore);

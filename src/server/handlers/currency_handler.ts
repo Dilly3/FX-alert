@@ -87,7 +87,7 @@ export class CurrencyHandler {
 
   getLiveRates = () => {
     return async (
-      req: Request<{}, {}, {}, LiveRatesRequest>,
+      req: Request<object, object, object, LiveRatesRequest>,
       res: Response
     ) => {
       const errors = validationResult(req);
@@ -158,7 +158,7 @@ export class CurrencyHandler {
 
   ratesScheduler = () => {
     return async (
-      req: Request<{}, {}, { operation: string }>,
+      req: Request<object, object, { operation: string }>,
       res: Response
     ) => {
       try {
