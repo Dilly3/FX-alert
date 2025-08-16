@@ -14,10 +14,12 @@ import {
 import { RedisClient } from "../datastore/redis/redis";
 import { ForexApi } from "../fx/forex_api/forex_api";
 import { SendGrid } from "../mailer/sendgrid/sendgrid";
+import { RedisClientType } from "redis";
 
 export interface AppConfig {
   dbFirestore?: Firestore;
   dbPG?: DataSource;
+  redis: RedisClient;
   secrets?: config;
 }
 
@@ -25,6 +27,7 @@ export async function initializeAppConfig(): Promise<AppConfig> {
   const appConfig: AppConfig = {
     dbFirestore: null!,
     dbPG: null!,
+    redis: null!,
     secrets: null!,
   };
 
@@ -41,6 +44,14 @@ export async function initializeAppConfig(): Promise<AppConfig> {
       try {
         appConfig.dbFirestore = await initializeFirestore("fx-alert-db");
         console.log("Firestore initialized successfully");
+        // Initialize Redis client first
+        appConfig.redis = new RedisClient(
+          appConfig!.secrets!.redis_host!,
+          appConfig!.secrets!.redis_port!,
+          appConfig!.secrets!.redis_password!,
+          appConfig!.secrets!.redis_username!,
+          appConfig!.secrets!.redis_ttl_hr!
+        );
       } catch (error) {
         LogError("Firestore initialization failed:", error);
         throw new Error(
@@ -81,19 +92,11 @@ export function initializeApp(config: AppConfig) {
     );
     const errorLog = getErrorLogStore(config!.dbPG!, config!.dbFirestore!);
 
-    // // Initialize Redis client first
-    const redis = new RedisClient(
-      config!.secrets!.redis_host!,
-      config!.secrets!.redis_port!,
-      config!.secrets!.redis_password!,
-      config!.secrets!.redis_username!,
-      config!.secrets!.redis_ttl_hr!
-    );
     // initialize ForexApi with Redis client
     const forexApi = new ForexApi(
       config!.secrets!.forex_api_key!,
       currencyStore,
-      redis
+      config!.redis
     );
     const sendgrid = new SendGrid(config!.secrets!);
     LogInfo("Stores initialized successfully", {});

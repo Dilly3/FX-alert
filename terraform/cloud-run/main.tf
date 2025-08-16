@@ -12,10 +12,17 @@ resource "google_cloud_run_service" "fx_alert" {
   template {
     metadata {
       annotations = {
-        "run.googleapis.com/vpc-access-connector" = data.google_vpc_access_connector.fx_alert_connector.id
-        "run.googleapis.com/vpc-egress"           = "private-ranges-only"
-        "autoscaling.knative.dev/minScale"        = var.min_instances
-        "autoscaling.knative.dev/maxScale"        = var.max_instances
+           "run.googleapis.com/vpc-access-connector" = data.google_vpc_access_connector.fx_alert_connector.id
+"run.googleapis.com/vpc-egress"           = "private-ranges-only"
+"autoscaling.knative.dev/minScale"        = var.min_instances
+"autoscaling.knative.dev/maxScale"        = var.max_instances
+"run.googleapis.com/startup-cpu-boost"    = "false"
+"run.googleapis.com/execution-environment" = "gen1"
+"run.googleapis.com/cpu-throttling"        = "true"
+"autoscaling.knative.dev/target"          = "concurrency"
+"run.googleapis.com/startup-cpu-boost" = "true"
+"autoscaling.knative.dev/targetUtilization" = "70"
+"run.googleapis.com/max-concurrency" = "20"
       }
     }
     spec {
@@ -36,8 +43,8 @@ resource "google_cloud_run_service" "fx_alert" {
           value = var.environment
         }
       }
-      container_concurrency = 80
-      timeout_seconds       = 300
+      container_concurrency = 20
+      timeout_seconds       = 180
     }
   }
 

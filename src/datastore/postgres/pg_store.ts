@@ -47,7 +47,17 @@ export async function initializePgDB(config: config): Promise<DataSource> {
     db_instance = AppDataSource;
     return db_instance;
   } catch (error) {
-    console.log("Database initialization failed:", error);
+    console.log("database initialization failed:", error);
     throw error;
+  }
+}
+
+export async function ClosePgDB(): Promise<void> {
+  try {
+    await getDB().destroy();
+    console.log("postgresql connection closed");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error("error closing postgresql connection: " + message);
   }
 }

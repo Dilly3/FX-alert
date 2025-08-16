@@ -47,7 +47,9 @@ export async function initializeFirestore(
     // Reset db on failure
     db = null;
     throw new Error(
-      `Firestore initialization failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      `Firestore initialization failed: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
     );
   }
 }
@@ -59,4 +61,14 @@ export function getFirestoreDB(): Firestore {
     );
   }
   return db;
+}
+
+export async function CloseFirestoreDB(): Promise<void> {
+  try {
+    await getFirestoreDB().terminate();
+    console.log("Firestore connection closed");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error("Error closing Firestore connection: " + message);
+  }
 }

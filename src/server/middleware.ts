@@ -11,7 +11,7 @@ export function RateLimiting(secrets: config): RateLimitRequestHandler {
   if (isTest) {
     return rateLimit({
       windowMs: 15 * 60 * 1000,
-      max: Infinity,
+      max: 5,
       handler: (req, res, next) => next(),
     });
   }
@@ -53,8 +53,12 @@ export function RateLimitingEmail(secrets: config): RequestHandler {
   }
   const isDev =
     process.env.NODE_ENV === "dev" || (secrets ? secrets.env === "dev" : true);
-  const windowMs = isDev ? 60_000 : 12_00_000;
-  const maxRequests = isDev ? 10 : 7;
+  const windowMs = isDev
+    ? 60_000
+    : secrets
+    ? secrets.rate_limit_window! * 1000
+    : 60_000;
+  const maxRequests = isDev ? 10 : secrets ? secrets.rate_limit_max! : 10;
   const retryAfterSeconds = Math.ceil(windowMs / 1000);
   const errorMessage = `Email rate limit exceeded. Try again in ${retryAfterSeconds} seconds.`;
 

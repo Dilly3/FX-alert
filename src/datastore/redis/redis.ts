@@ -29,7 +29,16 @@ export class RedisClient {
     this.CACHE_TTL = CACHE_TTL;
     this.isUp = isUp;
   }
-
+  public closeRedis = async (): Promise<void> => {
+    if (this.client) {
+      try {
+        await this.client.quit();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "unknown error";
+        throw new Error(message + ":" + message);
+      }
+  };
+  }
   private connect(
     username: string,
     password: string,
