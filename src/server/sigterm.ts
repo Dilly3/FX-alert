@@ -1,5 +1,6 @@
 import { CloseFirestoreDB } from "../datastore/firestore/store";
 import { ClosePgDB } from "../datastore/postgres/pg_store";
+import { LogError } from "../logger/gcp_logger";
 import { AppConfig } from "./app";
 
 // force shutdown after timeout
@@ -38,6 +39,7 @@ const gracefulShutdown = async (
           console.log("Firestore connection closed");
         });
       } catch (error) {
+        LogError("Error closing Firestore connection", error);
         throw error;
       }
     }
@@ -48,6 +50,18 @@ const gracefulShutdown = async (
           console.log("PostgreSQL connection closed");
         });
       } catch (error) {
+        LogError("Error closing PostgreSQL connection", error);
+        throw error;
+      }
+    }
+
+    if (appConfig.redis != null) {
+      try {
+        Promise.resolve(appConfig.redis.closeRedis()).then(() => {
+          console.log("Redis connection closed");
+        });
+      } catch (error) {
+        LogError("Error closing Redis connection", error);
         throw error;
       }
     }
