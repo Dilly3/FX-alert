@@ -2,7 +2,7 @@ import { Express } from "express";
 import { setAppState } from "../secrets/secrets_manager";
 import { AppConfig, initializeAppConfig } from "../server/app";
 import { httpBadRequest, httpOK } from "../server/response";
-import { setCurrencyRouter, setupApp} from "../server/routes";
+import { setCurrencyRouter, setupApp } from "../server/routes";
 import request from "supertest";
 import { ConvertCurrencyResponse } from "../model/dtos";
 import { MockValidatorDB } from "./__mocks__/validation.mocks";
@@ -25,6 +25,7 @@ jest.mock("../datastore/datastore", () => ({
 let appConfig: AppConfig = {
   dbFirestore: null!,
   dbPG: null!,
+  redis: null!,
   secrets: {
     env: "test",
     rate_limit_max: 10,
@@ -109,6 +110,18 @@ describe("GET /v1/currency/convert", () => {
       to: "EUR",
       amount: 100,
       date: "2025/01/01",
+    });
+
+    expect(res.statusCode).toBe(httpBadRequest);
+    expect(res.body.error).toBe("bad request");
+  });
+
+  it("returns status 400 for invalid amount", async () => {
+    const res = await request(app).get("/v1/currency/convert").query({
+      from: "USD",
+      to: "EUR",
+      amount: "hundred",
+      date: "2025-01-01",
     });
 
     expect(res.statusCode).toBe(httpBadRequest);
