@@ -28,7 +28,7 @@
 
 **_Right-click the link to open in new tab_**
 
-### Link - [**Readme.io**](https://fx-alert.readme.io/docs/getting-started#/)
+### Link - [**Readme.io**](https://fx-alert.readme.io/reference/healthcheck#/)
 
 ## 📁 Project Structure
 
