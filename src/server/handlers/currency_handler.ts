@@ -1,6 +1,6 @@
 import { LogError, LogInfo } from "../../logger/gcp_logger";
 import { Request, Response } from "express";
-import { LiveRatesRequest } from "../../model/dtos";
+import { LiveRatesRequest, LiveRatesResponse } from "../../model/dtos";
 import {
   CurrencyHandlerUserStore,
   ErrorLogStore,
@@ -86,7 +86,12 @@ export class CurrencyHandler {
   getLiveRates = () => {
     return async (
       req: Request<object, object, object, LiveRatesRequest>,
-      res: Response
+      res: Response<{
+        message: string;
+        success: boolean;
+        baseCurrency?: string;
+        rates?: Record<string, number>;
+      }>
     ) => {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -126,7 +131,10 @@ export class CurrencyHandler {
         LogError("Error getting live rates:", message);
         res
           .status(500)
-          .json({ message: "Error getting live rates", error: message });
+          .json({
+            message: "Error getting live rates" + message,
+            success: false,
+          });
       }
     };
   };
