@@ -115,6 +115,7 @@ export class CurrencyHandler {
         } else {
           res.json({
             message: "Live rates retrieved",
+            baseCurrency: request.base,
             rates: response.rates,
             success: true,
           });

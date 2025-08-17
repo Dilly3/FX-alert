@@ -1,4 +1,4 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
   title: FX Alert API
   description: |
@@ -28,13 +28,13 @@ paths:
     get:
       operationId: healthCheck
       summary: Health Check
-      description: Check the health status of the application and database connections
+      description: Check the health status of the application.
       tags:
         - Health
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: Application is ready and healthy
           schema:
             type: object
@@ -48,7 +48,7 @@ paths:
               environment:
                 type: string
                 example: "GCP"
-        '503':
+        "503":
           description: Application is initializing
           schema:
             type: object
@@ -73,7 +73,7 @@ paths:
       produces:
         - application/json
       responses:
-        '200':
+        "200":
           description: List of supported currencies retrieved successfully
           schema:
             type: object
@@ -90,10 +90,10 @@ paths:
                   EUR: "Euro"
                   GBP: "British Pound"
                   JPY: "Japanese Yen"
-        '500':
+        "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: "#/definitions/ErrorResponse"
 
   /currency/convert:
     get:
@@ -110,13 +110,13 @@ paths:
           required: true
           description: Source currency code (e.g., USD, EUR)
           type: string
-          pattern: '^[A-Z]{3}$'
+          pattern: "^[A-Z]{3}$"
         - name: to
           in: query
           required: true
           description: Target currency code (e.g., EUR, GBP)
           type: string
-          pattern: '^[A-Z]{3}$'
+          pattern: "^[A-Z]{3}$"
         - name: amount
           in: query
           required: true
@@ -130,7 +130,7 @@ paths:
           type: string
           format: date
       responses:
-        '200':
+        "200":
           description: Currency converted successfully
           schema:
             type: object
@@ -162,20 +162,20 @@ paths:
                     type: number
               success:
                 type: boolean
-        '400':
+        "400":
           description: Bad request - invalid parameters
           schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
+            $ref: "#/definitions/ErrorResponse"
+        "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: "#/definitions/ErrorResponse"
 
   /currency/rates:
     get:
       operationId: getLiveRates
       summary: Get Live Exchange Rates
-      description: Get real-time exchange rates for specified currencies. Optionally send rates to email if user is verified.
+      description: Get real-time exchange rates for specified currencies. (Optional) Add a verified email to send rates to email (for registered and verified users only).
       tags:
         - Currency
       produces:
@@ -186,13 +186,13 @@ paths:
           required: true
           description: Base currency code (e.g., USD, EUR)
           type: string
-          pattern: '^[A-Z]{3}$'
+          pattern: "^[A-Z]{3}$"
         - name: currencies
           in: query
           required: true
           description: Comma-separated list of target currency codes
           type: string
-          pattern: '^[A-Z]{3}(,[A-Z]{3})*$'
+          pattern: "^[A-Z]{3}(,[A-Z]{3})*$"
         - name: email
           in: query
           required: false
@@ -200,7 +200,7 @@ paths:
           type: string
           format: email
       responses:
-        '200':
+        "200":
           description: Live rates retrieved successfully
           schema:
             type: object
@@ -213,7 +213,7 @@ paths:
                   type: number
               success:
                 type: boolean
-        '400':
+        "400":
           description: Bad request - email not verified
           schema:
             type: object
@@ -222,16 +222,16 @@ paths:
                 type: string
               success:
                 type: boolean
-        '500':
+        "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: "#/definitions/ErrorResponse"
 
   /user/register:
     post:
       operationId: createUser
       summary: Create User Account
-      description: Create a new user account with email verification
+      description: Create a new user account and verify email address
       tags:
         - User Management
       consumes:
@@ -257,18 +257,18 @@ paths:
                 example: "user@example.com"
               baseCurrency:
                 type: string
-                pattern: '^[A-Z]{3}$'
+                pattern: "^[A-Z]{3}$"
                 description: User's base currency preference
                 example: "USD"
               targetCurrency:
                 type: array
                 items:
                   type: string
-                  pattern: '^[A-Z]{3}$'
+                  pattern: "^[A-Z]{3}$"
                 description: User's target currency preference(s) - array of currency codes (can contain single or multiple codes)
                 example: ["EUR", "GBP", "JPY"]
       responses:
-        '201':
+        "201":
           description: User created successfully, verification email sent
           schema:
             type: object
@@ -309,7 +309,7 @@ paths:
               success:
                 type: boolean
                 example: true
-        '400':
+        "400":
           description: Bad request - user already exists
           schema:
             type: object
@@ -320,10 +320,10 @@ paths:
               success:
                 type: boolean
                 example: false
-        '500':
+        "500":
           description: Internal server error
           schema:
-            $ref: '#/definitions/ErrorResponse'
+            $ref: "#/definitions/ErrorResponse"
 
   /user/verify:
     get:
@@ -346,9 +346,9 @@ paths:
           required: true
           description: Verification PIN sent to user's email
           type: string
-          pattern: '^[0-9]{6}$'
+          pattern: "^[0-9]{6}$"
       responses:
-        '200':
+        "200":
           description: User verified successfully
           schema:
             type: object
@@ -357,7 +357,7 @@ paths:
                 type: string
               success:
                 type: boolean
-        '400':
+        "400":
           description: Bad request - user already verified
           schema:
             type: object
@@ -366,7 +366,7 @@ paths:
                 type: string
               success:
                 type: boolean
-        '401':
+        "401":
           description: Unauthorized - invalid PIN
           schema:
             type: object
@@ -375,7 +375,7 @@ paths:
                 type: string
               success:
                 type: boolean
-        '404':
+        "404":
           description: User not found
           schema:
             type: object
@@ -397,7 +397,6 @@ definitions:
         description: Error type
       success:
         type: boolean
-
 
 tags:
   - name: Health
@@ -431,4 +430,4 @@ x-google-quota:
     - name: "fxalertapi.googleapis.com/requests_per_day"
       displayName: "Requests per day"
       freeTier: 10
-      maxLimit: 10 
+      maxLimit: 10
