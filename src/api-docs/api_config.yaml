@@ -203,16 +203,7 @@ paths:
         "200":
           description: Live rates retrieved successfully
           schema:
-            type: object
-            properties:
-              message:
-                type: string
-              rates:
-                type: object
-                additionalProperties:
-                  type: number
-              success:
-                type: boolean
+            $ref: "#/definitions/LiveRatesResponse"
         "400":
           description: Bad request - email not verified
           schema:
@@ -397,7 +388,38 @@ definitions:
         description: Error type
       success:
         type: boolean
-
+  LiveRatesResponse:
+    type: "object"
+    required:
+      - "message"
+      - "success"
+    properties:
+      message:
+        type: "string"
+        description: "Response message"
+        example: "Live rates retrieved"
+      baseCurrency:
+        type: "string"
+        description: "The base currency code"
+        example: "ETH"
+        pattern: "^[A-Z]{3,4}$"
+      rates:
+        type: "object"
+        description: "Currency exchange rates relative to the base currency"
+        additionalProperties:
+          type: "number"
+          format: "double"
+          minimum: 0
+        example:
+          AED: 16381.5254813531
+          GBP: 3291.2705777308
+          INR: 390316.3141444735
+          NGN: 6825537.184110118
+          USD: 4459.9671122025
+      success:
+        type: "boolean"
+        description: "Indicates if the request was successful"
+        example: true
 tags:
   - name: Health
     description: Health check endpoints
