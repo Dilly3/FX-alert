@@ -1,4 +1,4 @@
-import { LogInfo, LogError } from "./logger/gcp_logger";
+import { LogInfo, LogError, InitLog } from "./logger/gcp_logger";
 import { getAppState } from "./secrets/secrets_manager";
 import { initializeAppConfig, initializeApp, AppConfig } from "./server/app";
 import { setCurrencyRouter, setupApp, setUserRouter } from "./server/routes";
@@ -6,6 +6,7 @@ import { handleSignal } from "./server/sigterm";
 require("dotenv").config();
 const connections = new Set<any>();
 Promise.resolve().then(async () => {
+  InitLog();
   try {
     LogInfo("Starting application initialization...", {});
 
