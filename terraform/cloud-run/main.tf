@@ -22,7 +22,7 @@ resource "google_cloud_run_service" "fx_alert" {
 "autoscaling.knative.dev/target"          = "concurrency"
 "run.googleapis.com/startup-cpu-boost" = "true"
 "autoscaling.knative.dev/targetUtilization" = "70"
-"run.googleapis.com/max-concurrency" = "20"
+"run.googleapis.com/max-concurrency" = "10"
       }
     }
     spec {
@@ -43,7 +43,7 @@ resource "google_cloud_run_service" "fx_alert" {
           value = var.environment
         }
       }
-      container_concurrency = 20
+      container_concurrency = 10
       timeout_seconds       = 180
     }
   }

@@ -22,14 +22,16 @@ declare REGISTRY_NAME="${PROJECT_NAME}-registry"
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
-            echo "  $0 -p <project-ID>"
+            echo " run: $0 -p <project-ID>"
+exit 0;
             ;;
         -p|--project)
             GOOGLE_CLOUD_PROJECT="$2"
             shift 2
             ;;
         *)
-            echo "  $0 -p <project-ID>"
+            echo " run: $0 -p <project-ID>"
+exit 0;
             ;;
     esac
 done

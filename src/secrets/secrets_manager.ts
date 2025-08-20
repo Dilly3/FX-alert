@@ -1,6 +1,55 @@
 import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
 import * as dotenv from "dotenv";
 
+interface DatabaseConfig {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  name: string;
+}
+
+interface RedisConfig {
+  host: string;
+  password: string;
+  username: string;
+  port: number;
+  ttl_hr: number;
+}
+
+interface SendGridConfig {
+  key: string;
+  email_subject: string;
+  sender_email: string;
+}
+
+interface RateLimitingConfig {
+  max: number;
+  window: number;
+}
+
+interface MiscConfig {
+  firebase_storage_bucket: string;
+  forex_api_key: string;
+  fx_alert_project_id: string;
+  base_url: string;
+}
+
+export interface FxAlertSecrets {
+  database: DatabaseConfig;
+  redis: RedisConfig;
+  sendgrid: SendGridConfig;
+  rate_limiting: RateLimitingConfig;
+  misc: MiscConfig;
+}
+
+export interface AppConfig {
+  environment: string;
+  projectId: string;
+  secretsName: string;
+  secrets: FxAlertSecrets;
+}
+
 export let default_config: config | null = null;
 let isAppReady: boolean = false;
 export const getAppState = () => isAppReady;
@@ -33,7 +82,64 @@ export type config = {
   redis_ttl_hr?: number;
 };
 
-async function getSecret(secretName: string): Promise<string> {
+function validateSecrets(secrets: any): asserts secrets is FxAlertSecrets {
+  const requiredSections = [
+    "database",
+    "redis",
+    "sendgrid",
+    "misc",
+    "rate_limiting",
+  ];
+
+  for (const section of requiredSections) {
+    if (!secrets[section]) {
+      throw new Error(
+        `Missing required section in consolidated secrets: ${section}`
+      );
+    }
+  }
+
+  // Validate redis config
+  const redisRequired = ["host", "password", "username", "port", "ttl_hr"];
+  for (const field of redisRequired) {
+    if (!secrets.redis[field]) {
+      throw new Error(`Missing required redis field: ${field}`);
+    }
+  }
+
+  // Validate sendgrid config
+  const sendgridRequired = ["key", "email_subject", "sender_email"];
+  for (const field of sendgridRequired) {
+    if (!secrets.sendgrid[field]) {
+      throw new Error(`Missing required sendgrid field: ${field}`);
+    }
+  }
+
+  // Validate misc config
+  const miscRequired = [
+    "firebase_storage_bucket",
+    "forex_api_key",
+    "fx_alert_project_id",
+    "base_url",
+  ];
+  for (const field of miscRequired) {
+    if (!secrets.misc[field]) {
+      throw new Error(`Missing required misc field: ${field}`);
+    }
+  }
+
+  // Validate rate_limiting config
+  const rateLimitingRequired = ["max", "window"];
+  for (const field of rateLimitingRequired) {
+    if (!secrets.rate_limiting[field]) {
+      throw new Error(`Missing required rate_limiting field: ${field}`);
+    }
+  }
+
+  console.log("Secret validation passed");
+}
+
+async function getSecret(secretName: string): Promise<FxAlertSecrets> {
   try {
     const client = new SecretManagerServiceClient({
       timeout: 10000, // 10 second timeout
@@ -53,9 +159,10 @@ async function getSecret(secretName: string): Promise<string> {
     if (!secretValue) {
       throw new Error(`Secret '${secretName}' is empty or not found`);
     }
-
+    const secrets: FxAlertSecrets = JSON.parse(secretValue);
+    validateSecrets(secrets);
     await client.close();
-    return secretValue;
+    return secrets;
   } catch (error) {
     console.error(`Failed to fetch secret '${secretName}':`, error);
     throw error;
@@ -63,75 +170,37 @@ async function getSecret(secretName: string): Promise<string> {
 }
 
 export async function loadGCPSecrets(): Promise<config> {
-  const [
-    dbPassword,
-    dbUser,
-    dbName,
-    dbHost,
-    dbPort,
-    projectId,
-    sendgridApiKey,
-    sendgridSenderEmail,
-    firebaseStorageBucket,
-    sendgridEmailSubject,
-    forexApiKey,
-    firestoreDatabaseId,
-    rateLimitMax,
-    rateLimitWindow,
-    baseUrl,
-    redisHost,
-    redisPort,
-    redisPassword,
-    redisUsername,
-    redisTtlHr,
-  ] = await Promise.all([
-    getSecret("database_password"),
-    getSecret("database_user"),
-    getSecret("database_name"),
-    getSecret("database_host"),
-    getSecret("database_port"),
-    getSecret("fx_alert_project_id"),
-    getSecret("sendgrid_api_key"),
-    getSecret("sendgrid_sender_email"),
-    getSecret("firebase_storage_bucket"),
-    getSecret("sendgrid_email_subject"),
-    getSecret("forex_api_key"),
-    getSecret("database_id"),
-    getSecret("rate_limit_max"),
-    getSecret("rate_limit_window"),
-    getSecret("base_url"),
-    getSecret("redis_host"),
-    getSecret("redis_port"),
-    getSecret("redis_password"),
-    getSecret("redis_username"),
-    getSecret("redis_ttl_hr"),
-  ]);
+  const secret_name = process.env.SECRETS_NAME || undefined;
+  if (!secret_name) {
+    throw new Error(`Secret '${secret_name}' is not defined`);
+  }
+  const secrets = await getSecret(secret_name);
 
   const env = process.env.ENV!;
 
   const config = {
     env: env,
-    host: dbHost,
-    port: parseInt(dbPort),
-    username: dbUser,
-    password: dbPassword,
-    database: dbName,
+    host: secrets.database.host,
+    port: secrets.database.port,
+    username: secrets.database.user,
+    password: secrets.database.password,
+    database: secrets.database.name,
     ssl: false,
-    projectId: projectId,
-    sendgrid_api_key: sendgridApiKey,
-    sendgrid_sender_email: sendgridSenderEmail,
-    firebase_storage_bucket: firebaseStorageBucket,
-    sendgrid_email_subject: sendgridEmailSubject,
-    forex_api_key: forexApiKey,
-    firestore_database_id: firestoreDatabaseId,
-    rate_limit_max: parseInt(rateLimitMax),
-    rate_limit_window: parseInt(rateLimitWindow),
-    base_url: baseUrl,
-    redis_host: redisHost,
-    redis_port: parseInt(redisPort),
-    redis_password: redisPassword,
-    redis_username: redisUsername,
-    redis_ttl_hr: parseInt(redisTtlHr),
+    projectId: secrets.misc.fx_alert_project_id,
+    sendgrid_api_key: secrets.sendgrid.key,
+    sendgrid_sender_email: secrets.sendgrid.sender_email,
+    firebase_storage_bucket: secrets.misc.firebase_storage_bucket,
+    sendgrid_email_subject: secrets.sendgrid.email_subject,
+    forex_api_key: secrets.misc.forex_api_key,
+    firestore_database_id: secrets.misc.firebase_storage_bucket,
+    rate_limit_max: secrets.rate_limiting.max,
+    rate_limit_window: secrets.rate_limiting.window,
+    base_url: secrets.misc.base_url,
+    redis_host: secrets.redis.host,
+    redis_port: secrets.redis.port,
+    redis_password: secrets.redis.password,
+    redis_username: secrets.redis.username,
+    redis_ttl_hr: secrets.redis.ttl_hr,
   };
   default_config = config;
   return config;

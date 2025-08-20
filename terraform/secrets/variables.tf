@@ -1,3 +1,7 @@
+variable "project_id" {
+type = string
+}
+
 variable "database_host" {
 type = string
 }

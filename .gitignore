@@ -10,6 +10,7 @@ firebase.json
 tsconfig.tsbuildinfo
 .terraform
 .terraform.lock.hcl
+sample.main.tf
 variables.auto.tfvars
 cost-optimization-guide.md
 monitor-costs.sh

@@ -27,3 +27,4 @@ cloud_build.sh
 update.sh
 deploy-copy.sh
 jest.config.js
+sample.main.tf
