@@ -2,7 +2,7 @@ terraform {
   required_version = ">= 1.0"
   
   backend "gcs" {
-    bucket = "fx-alert-tfstate-bucket"
+    bucket = "fx-alert-tf-state-bucket"
     prefix = "terraform/network/state"
   }
   

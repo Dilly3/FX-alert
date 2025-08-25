@@ -18,7 +18,7 @@ info:
     name: MIT
     url: https://opensource.org/licenses/MIT
 
-host: fx-alert-770622112844.us-west1.run.app
+host: fx-alert-770622112844.us-west2.run.app
 basePath: /v1
 schemes:
   - https
@@ -430,7 +430,7 @@ tags:
 
 # GCP API Gateway specific extensions
 x-google-backend:
-  address: "https://fx-alert-770622112844.us-west1.run.app"
+  address: "https://fx-alert-770622112844.us-west2.run.app"
 
 x-google-management:
   metrics:
