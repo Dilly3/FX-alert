@@ -16,7 +16,7 @@ declare WORK_DIR="$(dirname "$(readlink -f $0)")"
 declare FOLDER_NAME="${WORK_DIR##*/}"
 
 PROJECT_NAME="$(echo "${FOLDER_NAME}" | tr '[:upper:]' '[:lower:]')"
-declare REGISTRY_NAME="${PROJECT_NAME}-registry"
+declare REGISTRY_NAME="fx-alert-registry"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -52,7 +52,7 @@ fi
 echo "✅ Build completed successfully"
 echo ""
 
-IMAGE="us-west1-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/${REGISTRY_NAME}/${PROJECT_NAME}:latest"
+IMAGE="us-west2-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/${REGISTRY_NAME}/${PROJECT_NAME}:latest"
 docker build -t $IMAGE .
 echo "Building Docker image: $IMAGE"
 if [[ $? -ne 0 ]]; then
@@ -65,7 +65,7 @@ echo " 🚨🚨🚨🚨IMAGE: $IMAGE"
 echo ""
 echo "👷👷👷 Configuring Docker authentication for Artifact Registry... ⏳"
 echo ""
-gcloud auth configure-docker us-west1-docker.pkg.dev
+gcloud auth configure-docker us-west2-docker.pkg.dev
 if [[ $? -ne 0 ]]; then
     echo "Failed to configure Docker authentication ❌❌ "
     exit 1

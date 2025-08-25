@@ -26,7 +26,7 @@ resource "google_vpc_access_connector" "connector" {
   name          = "fx-alert-vpc-connector"
   ip_cidr_range = "10.8.0.0/28"
   network       = google_compute_network.private_network.name
-  region        = "us-west1"
+  region        = var.region
   machine_type   = "e2-micro"
   min_instances  = 2
   max_instances  = 4

@@ -1,3 +1,8 @@
+provider "google" {
+project = "fs-alert-d4f21"
+region = "us-west2"
+}
+
 resource "google_secret_manager_secret" "fx_alert_secrets" {
   project   = var.project_id
   secret_id = "fx_alert_secrets"
