@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import * as serviceAccount from "../../../service-account-key.json";
+import * as serviceAccount from "../../../service-account2-key.json";
 import { Firestore } from "@google-cloud/firestore";
 import { default_config } from "../../secrets/secrets_manager";
 import { getApps } from "firebase-admin/app";
