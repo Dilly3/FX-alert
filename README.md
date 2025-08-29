@@ -22,7 +22,7 @@
 
 ## 🏗️ Architecture
 
-![System Architecture](https://storage.googleapis.com/fx-alert-tf-state-bucket/images/Screenshot%202025-08-11%20at%202.48.34%E2%80%AFPM.png)
+![System Architecture](https://storage.googleapis.com/fx-alert-tf-state-buckett/images/Screenshot%202025-08-11%20at%202.48.34%E2%80%AFPM.png)
 
 ## 📚 API Documentation
 
