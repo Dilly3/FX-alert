@@ -10,6 +10,6 @@ COPY . .
 
 CMD ["node", "dist/index.js"]
 
-ENV GOOGLE_CLOUD_PROJECT=fs-alert-d4f21
+ENV GOOGLE_CLOUD_PROJECT=fx-alert-470308
 ENV ENV=prod
 ENV SECRETS_NAME=fx_alert_secrets
